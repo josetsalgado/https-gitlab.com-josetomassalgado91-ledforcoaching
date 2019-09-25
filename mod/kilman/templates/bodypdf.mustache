@@ -1,0 +1,38 @@
+<style>
+.tablehead, .bodytable {
+    padding: 30px; 
+    vertical-align: top; 
+    border-top: 1px solid #dee2e6;
+}
+
+
+.pdflastrow {
+    background-color: #f2f2f2;
+}
+</style>
+
+<table class="generaltable">
+    <thead>
+        <tr>
+            <th class="tablehead">Usuario</th>
+            <th class="tablehead">Acomodativo</th>
+            <th class="tablehead">Evasivo</th>
+            <th class="tablehead">Transador</th>
+            <th class="tablehead">Colaborativo</th>
+            <th class="tablehead">Competitivo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#tableresponses}}
+            <tr class="pdflastrow">
+                <td class="bodytable">{{user}}</td>
+                <td class="bodytable">{{acomodativo}}</td>
+                <td class="bodytable">{{evasivo}}</td>
+                <td class="bodytable">{{transador}}</td>
+                <td class="bodytable">{{colaborativo}}</td>
+                <td class="bodytable">{{competitivo}}</td>
+            </tr>
+        {{/tableresponses}}
+        
+    </tbody>
+</table>

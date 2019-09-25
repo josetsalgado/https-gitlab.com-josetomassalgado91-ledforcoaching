@@ -230,6 +230,8 @@ switch ($action) {
             $titletext = get_string('myresponsetitle', 'kilman', $numresp);
         } else {
             $titletext = get_string('yourresponse', 'kilman');
+            $titletext .= "<br><a href='util/Interpretacion_Resultados_Test.pdf' target='_blank' style='font-size: 14px;'>Descargar Interpretación</a>";
+            $titletext .= "<br><a href='util/responses.php' target='_blank' style='font-size: 14px;'>Descargar Respuestas</a>";
         }
 
         $compare = false;

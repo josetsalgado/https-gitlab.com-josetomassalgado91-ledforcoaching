@@ -3244,7 +3244,7 @@ class kilman {
             if ($user = $DB->get_record('user', ['id' => $userid])) {
                 $ruser = fullname($user);
             }
-            
+            $contar = array("0" => $ruser, "1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0);
         }
         // Available group modes (0 = no groups; 1 = separate groups; 2 = visible groups).
         $groupmode = groups_get_activity_groupmode($this->cm, $this->course);
@@ -3264,11 +3264,7 @@ class kilman {
             $table->wrap = [];
             if ($compare) {
                 $table->align = ['left'];
-                $headfbsections = array();
-                foreach ($fbsections as $fbsection){
-                    array_push($headfbsections, $fbsection->sectionlabel);
-                }
-//                $fbsections
+                $headfbsections = array("Usuario", "Acomodativo", "Evasivo", "Transador", "Colaborativo", "Competitivo");
                 $table->head = $headfbsections;
             } else {
                 $table->align = ['left', 'right', 'right'];
@@ -3299,6 +3295,7 @@ class kilman {
                 $responsescores[$qid] = $question->get_feedback_scores($rids);
             }
         }
+        
         // Just in case no values have been entered in the various questions possible answers field.
         if ($maxtotalscore === 0) {
             return '';
@@ -3319,7 +3316,6 @@ class kilman {
             if (!empty($responsescore)) {
                 foreach ($responsescore as $rrid => $response) {
                     
-                    
                     // If this is current user's response OR if current user is viewing another group's results.
                     if ($rrid == $rid || $allresponses) {
                         if (!isset($qscore[$qid])) {
@@ -3330,6 +3326,7 @@ class kilman {
                     // Course score.
                     if (!isset($allqscore[$qid])) {
                         $allqscore[$qid] = 0;
+                        
                     }
                     // Only add current score if conditions below are met.
                     if ($groupmode == 0 || $isgroupmember || (!$isgroupmember && $rrid != $rid) || $allresponses) {
@@ -3408,8 +3405,7 @@ class kilman {
             }
             if ($this->survey->feedbackscores) {
                 if ($compare) {
-                    $contar = array("0" => $ruser, "1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0);
-                    foreach ($allqscore as $responsecategories) {
+                    foreach ($qscore as $responsecategories) {
                         if (isset($contar[$responsecategories])) {
                             $contar[$responsecategories]+=1;
                         } else {
