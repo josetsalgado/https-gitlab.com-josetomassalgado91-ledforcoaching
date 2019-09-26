@@ -225,6 +225,31 @@ class renderer extends \plugin_renderer_base {
         }
         return $this->render_from_template('mod_kilman/question_container', $pagetags);
     }
+    
+    /**
+     * Render a question response.
+     * @param mod_kilman\question\base $question The question object.
+     * @param stdClass $data All of the response data.
+     * @param int $qnum The question number.
+     * @return string The output for the page.
+     */
+    public function response_outputpdf($question, $data, $qnum=null) {
+        $pagetags = $question->response_outputpdf($data, $qnum);
+
+        // If the response has a template, then render it from the 'qformelement' context. If no template, then 'qformelement'
+        // already contains HTML.
+        if (($template = $question->response_template())) {
+            $pagetags->qformelement = $this->render_from_template($template, $pagetags->qformelement);
+        }
+
+        // Calling "question_output" may generate per question notifications. If present, add them to the question output.
+        if (($notifications = $question->get_notifications()) !== false) {
+            foreach ($notifications as $notification) {
+                $pagetags->notifications = $this->notification($notification, \core\output\notification::NOTIFY_ERROR);
+            }
+        }
+        return $this->render_from_template('mod_kilman/question_containerpdf', $pagetags);
+    }
 
     /**
      * Render all responses for a question.

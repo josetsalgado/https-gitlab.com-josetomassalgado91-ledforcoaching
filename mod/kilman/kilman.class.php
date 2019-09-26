@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -20,13 +21,11 @@
  * @author     Mike Churchward
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/mod/kilman/locallib.php');
+require_once($CFG->dirroot . '/mod/kilman/locallib.php');
 
 class kilman {
-
     // Class Properties.
 
     /**
@@ -38,7 +37,7 @@ class kilman {
      * The survey record.
      * @var object $survey
      */
-     // Todo var $survey; TODO.
+    // Todo var $survey; TODO.
 
     /**
      * @var $renderer Contains the page renderer when loaded, or false if not.
@@ -129,8 +128,7 @@ class kilman {
             $isbreak = false;
             foreach ($records as $record) {
 
-                $this->questions[$record->id] = \mod_kilman\question\base::question_builder($record->type_id,
-                    $record, $this->context);
+                $this->questions[$record->id] = \mod_kilman\question\base::question_builder($record->type_id, $record, $this->context);
 
                 if ($record->type_id != QUESPAGEBREAK) {
                     $this->questionsbysec[$sec][$record->id] = &$this->questions[$record->id];
@@ -174,45 +172,33 @@ class kilman {
         $kilman = $this;
 
         if (!$this->capabilities->view) {
-            $this->page->add_to_page('notifications',
-                $this->renderer->notification(get_string('noteligible', 'kilman', $this->name),
-                \core\output\notification::NOTIFY_ERROR));
+            $this->page->add_to_page('notifications', $this->renderer->notification(get_string('noteligible', 'kilman', $this->name), \core\output\notification::NOTIFY_ERROR));
         } else if (!$this->is_active()) {
-            $this->page->add_to_page('notifications',
-                $this->renderer->notification(get_string('notavail', 'kilman'), \core\output\notification::NOTIFY_ERROR));
+            $this->page->add_to_page('notifications', $this->renderer->notification(get_string('notavail', 'kilman'), \core\output\notification::NOTIFY_ERROR));
         } else if (!$this->is_open()) {
-            $this->page->add_to_page('notifications',
-                $this->renderer->notification(get_string('notopen', 'kilman', userdate($this->opendate)),
-                \core\output\notification::NOTIFY_ERROR));
+            $this->page->add_to_page('notifications', $this->renderer->notification(get_string('notopen', 'kilman', userdate($this->opendate)), \core\output\notification::NOTIFY_ERROR));
         } else if ($this->is_closed()) {
-            $this->page->add_to_page('notifications',
-                $this->renderer->notification(get_string('closed', 'kilman', userdate($this->closedate)),
-                \core\output\notification::NOTIFY_ERROR));
+            $this->page->add_to_page('notifications', $this->renderer->notification(get_string('closed', 'kilman', userdate($this->closedate)), \core\output\notification::NOTIFY_ERROR));
         } else if (!$this->user_is_eligible($USER->id)) {
-            $this->page->add_to_page('notifications',
-                $this->renderer->notification(get_string('noteligible', 'kilman'), \core\output\notification::NOTIFY_ERROR));
+            $this->page->add_to_page('notifications', $this->renderer->notification(get_string('noteligible', 'kilman'), \core\output\notification::NOTIFY_ERROR));
         } else if ($this->survey->realm == 'template') {
-            $this->page->add_to_page('notifications',
-                $this->renderer->notification(get_string('templatenotviewable', 'kilman'),
-                \core\output\notification::NOTIFY_ERROR));
+            $this->page->add_to_page('notifications', $this->renderer->notification(get_string('templatenotviewable', 'kilman'), \core\output\notification::NOTIFY_ERROR));
         } else if (!$this->user_can_take($USER->id)) {
             switch ($this->qtype) {
                 case kilmanDAILY:
-                    $msgstring = ' '.get_string('today', 'kilman');
+                    $msgstring = ' ' . get_string('today', 'kilman');
                     break;
                 case kilmanWEEKLY:
-                    $msgstring = ' '.get_string('thisweek', 'kilman');
+                    $msgstring = ' ' . get_string('thisweek', 'kilman');
                     break;
                 case kilmanMONTHLY:
-                    $msgstring = ' '.get_string('thismonth', 'kilman');
+                    $msgstring = ' ' . get_string('thismonth', 'kilman');
                     break;
                 default:
                     $msgstring = '';
                     break;
             }
-            $this->page->add_to_page('notifications',
-                $this->renderer->notification(get_string('alreadyfilled', 'kilman', $msgstring),
-                \core\output\notification::NOTIFY_ERROR));
+            $this->page->add_to_page('notifications', $this->renderer->notification(get_string('alreadyfilled', 'kilman', $msgstring), \core\output\notification::NOTIFY_ERROR));
         } else {
             // Handle the main kilman completion page.
             $quser = $USER->id;
@@ -221,15 +207,15 @@ class kilman {
 
             // If kilman was submitted with all required fields completed ($msg is empty),
             // then record the submittal.
-            $viewform = data_submitted($CFG->wwwroot."/mod/kilman/complete.php");
+            $viewform = data_submitted($CFG->wwwroot . "/mod/kilman/complete.php");
             if (!empty($viewform->rid)) {
-                $viewform->rid = (int)$viewform->rid;
+                $viewform->rid = (int) $viewform->rid;
             }
             if (!empty($viewform->sec)) {
-                $viewform->sec = (int)$viewform->sec;
+                $viewform->sec = (int) $viewform->sec;
             }
             if (data_submitted() && confirm_sesskey() && isset($viewform->submit) && isset($viewform->submittype) &&
-                ($viewform->submittype == "Submit Survey") && empty($msg)) {
+                    ($viewform->submittype == "Submit Survey") && empty($msg)) {
                 $this->response_delete($viewform->rid, $viewform->sec);
                 $this->rid = $this->response_insert($viewform->sec, $viewform->rid, $quser);
                 $this->response_commit($this->rid);
@@ -279,11 +265,11 @@ class kilman {
     }
 
     /*
-    * Function to view an entire responses data.
-    *
-    */
-    public function view_response($rid, $referer= '', $blankkilman = false, $resps = '', $compare = false,
-                                  $isgroupmember = false, $allresponses = false, $currentgroupid = 0) {
+     * Function to view an entire responses data.
+     *
+     */
+
+    public function view_response($rid, $referer = '', $blankkilman = false, $resps = '', $compare = false, $isgroupmember = false, $allresponses = false, $currentgroupid = 0) {
         $this->print_survey_start('', 1, 1, 0, $rid, false);
 
         $data = new stdClass();
@@ -301,8 +287,7 @@ class kilman {
             }
 
             if ($this->survey->feedbacknotes) {
-                $text = file_rewrite_pluginfile_urls($this->survey->feedbacknotes, 'pluginfile.php',
-                    $this->context->id, 'mod_kilman', 'feedbacknotes', $this->survey->id);
+                $text = file_rewrite_pluginfile_urls($this->survey->feedbacknotes, 'pluginfile.php', $this->context->id, 'mod_kilman', 'feedbacknotes', $this->survey->id);
                 $this->page->add_to_page('feedbacknotes', $this->renderer->box(format_text($text, FORMAT_HTML)));
             }
         }
@@ -317,12 +302,13 @@ class kilman {
     }
 
     /*
-    * Function to view an entire responses data.
-    *
-    * $value is unused, but is needed in order to get the $key elements of the array. Suppress PHPMD warning.
-    *
-    * @SuppressWarnings(PHPMD.UnusedLocalVariable)
-    */
+     * Function to view an entire responses data.
+     *
+     * $value is unused, but is needed in order to get the $key elements of the array. Suppress PHPMD warning.
+     *
+     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     */
+
     public function view_all_responses($resps) {
         $this->print_survey_start('', 1, 1, 0);
 
@@ -341,7 +327,7 @@ class kilman {
                 if ($question->type_id < QUESPAGEBREAK) {
                     $i++;
                 }
-                $qid = preg_quote('q'.$question->id, '/');
+                $qid = preg_quote('q' . $question->id, '/');
                 if ($question->type_id != QUESPAGEBREAK) {
                     $allrespdata[$i] = [];
                     $allrespdata[$i]['question'] = $question;
@@ -403,8 +389,7 @@ class kilman {
     public function user_has_saved_response($userid) {
         global $DB;
 
-        return $DB->record_exists('kilman_response',
-            ['kilmanid' => $this->id, 'userid' => $userid, 'complete' => 'n']);
+        return $DB->record_exists('kilman_response', ['kilmanid' => $this->id, 'userid' => $userid, 'complete' => 'n']);
     }
 
     public function user_time_for_new_attempt($userid) {
@@ -434,7 +419,7 @@ class kilman {
                 $attemptdayofyear = date('z', $attempt->submitted);
                 $currentdayofyear = date('z', $timenow);
                 $cantake = (($attemptyear < $currentyear) ||
-                    (($attemptyear == $currentyear) && ($attemptdayofyear < $currentdayofyear)));
+                        (($attemptyear == $currentyear) && ($attemptdayofyear < $currentdayofyear)));
                 break;
 
             case kilmanWEEKLY:
@@ -443,7 +428,7 @@ class kilman {
                 $attemptweekofyear = date('W', $attempt->submitted);
                 $currentweekofyear = date('W', $timenow);
                 $cantake = (($attemptyear < $currentyear) ||
-                    (($attemptyear == $currentyear) && ($attemptweekofyear < $currentweekofyear)));
+                        (($attemptyear == $currentyear) && ($attemptweekofyear < $currentweekofyear)));
                 break;
 
             case kilmanMONTHLY:
@@ -452,7 +437,7 @@ class kilman {
                 $attemptmonthofyear = date('n', $attempt->submitted);
                 $currentmonthofyear = date('n', $timenow);
                 $cantake = (($attemptyear < $currentyear) ||
-                    (($attemptyear == $currentyear) && ($attemptmonthofyear < $currentmonthofyear)));
+                        (($attemptyear == $currentyear) && ($attemptmonthofyear < $currentmonthofyear)));
                 break;
 
             default:
@@ -491,18 +476,17 @@ class kilman {
             // If you are allowed to view this response for another user.
             // If resp_view is set to kilman_STUDENTVIEWRESPONSES_NEVER, then this will always be false.
             if ($this->capabilities->readallresponses &&
-                ($this->resp_view == kilman_STUDENTVIEWRESPONSES_ALWAYS ||
-                 ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENCLOSED && $this->is_closed()) ||
-                 ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENANSWERED  && !$this->user_can_take($USER->id)))) {
+                    ($this->resp_view == kilman_STUDENTVIEWRESPONSES_ALWAYS ||
+                    ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENCLOSED && $this->is_closed()) ||
+                    ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENANSWERED && !$this->user_can_take($USER->id)))) {
                 return true;
             }
 
             // If you can read your own response.
             if (($response->userid == $USER->id) && $this->capabilities->readownresponses &&
-                ($this->count_submissions($USER->id) > 0)) {
+                    ($this->count_submissions($USER->id) > 0)) {
                 return true;
             }
-
         } else {
             // If you can view all responses always, then you can view it.
             if ($this->capabilities->readallresponseanytime) {
@@ -512,9 +496,9 @@ class kilman {
             // If you are allowed to view this response for another user.
             // If resp_view is set to kilman_STUDENTVIEWRESPONSES_NEVER, then this will always be false.
             if ($this->capabilities->readallresponses &&
-                ($this->resp_view == kilman_STUDENTVIEWRESPONSES_ALWAYS ||
-                 ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENCLOSED && $this->is_closed()) ||
-                 ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENANSWERED  && !$this->user_can_take($USER->id)))) {
+                    ($this->resp_view == kilman_STUDENTVIEWRESPONSES_ALWAYS ||
+                    ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENCLOSED && $this->is_closed()) ||
+                    ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENANSWERED && !$this->user_can_take($USER->id)))) {
                 return true;
             }
 
@@ -559,7 +543,7 @@ class kilman {
         $grouplogic = $canviewgroups || $canviewallgroups;
         $respslogic = ($numresp > 0) && ($numselectedresps > 0);
         return $this->can_view_all_responses_anytime($grouplogic, $respslogic) ||
-            $this->can_view_all_responses_with_restrictions($usernumresp, $grouplogic, $respslogic);
+                $this->can_view_all_responses_with_restrictions($usernumresp, $grouplogic, $respslogic);
     }
 
     /**
@@ -584,14 +568,13 @@ class kilman {
         // Can view if you are a valid group user, this is the owning course, and there are responses, and you can view
         // subject to viewing settings..
         return $grouplogic && $respslogic && $this->is_survey_owner() &&
-            ($this->capabilities->readallresponses &&
+                ($this->capabilities->readallresponses &&
                 ($this->resp_view == kilman_STUDENTVIEWRESPONSES_ALWAYS ||
-                    ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENCLOSED && $this->is_closed()) ||
-                    ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENANSWERED && $usernumresp)));
-
+                ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENCLOSED && $this->is_closed()) ||
+                ($this->resp_view == kilman_STUDENTVIEWRESPONSES_WHENANSWERED && $usernumresp)));
     }
 
-    public function count_submissions($userid=false, $groupid=0) {
+    public function count_submissions($userid = false, $groupid = 0) {
         global $DB;
 
         $params = [];
@@ -607,18 +590,18 @@ class kilman {
         // Public kilmans can have responses to multiple kilman instances.
         if ($this->survey_is_public_master()) {
             $sql = 'SELECT COUNT(r.id) ' .
-                'FROM {kilman_response} r ' .
-                'INNER JOIN {kilman} q ON r.kilmanid = q.id ' .
-                'INNER JOIN {kilman_survey} s ON q.sid = s.id ' .
-                $groupsql .
-                'WHERE s.id = :surveyid AND r.complete = :status' . $groupcnd;
+                    'FROM {kilman_response} r ' .
+                    'INNER JOIN {kilman} q ON r.kilmanid = q.id ' .
+                    'INNER JOIN {kilman_survey} s ON q.sid = s.id ' .
+                    $groupsql .
+                    'WHERE s.id = :surveyid AND r.complete = :status' . $groupcnd;
             $params['surveyid'] = $this->sid;
             $params['status'] = 'y';
         } else {
             $sql = 'SELECT COUNT(r.id) ' .
-                'FROM {kilman_response} r ' .
-                $groupsql .
-                'WHERE r.kilmanid = :kilmanid AND r.complete = :status' . $groupcnd;
+                    'FROM {kilman_response} r ' .
+                    $groupsql .
+                    'WHERE r.kilmanid = :kilmanid AND r.complete = :status' . $groupcnd;
             $params['kilmanid'] = $this->id;
             $params['status'] = 'y';
         }
@@ -637,7 +620,7 @@ class kilman {
      * @return array
      * @throws dml_exception
      */
-    public function get_responses($userid=false, $groupid=0) {
+    public function get_responses($userid = false, $groupid = 0) {
         global $DB;
 
         $params = [];
@@ -653,18 +636,18 @@ class kilman {
         // Public kilmans can have responses to multiple kilman instances.
         if ($this->survey_is_public_master()) {
             $sql = 'SELECT r.* ' .
-                'FROM {kilman_response} r ' .
-                'INNER JOIN {kilman} q ON r.kilmanid = q.id ' .
-                'INNER JOIN {kilman_survey} s ON q.sid = s.id ' .
-                $groupsql .
-                'WHERE s.id = :surveyid AND r.complete = :status' . $groupcnd;
+                    'FROM {kilman_response} r ' .
+                    'INNER JOIN {kilman} q ON r.kilmanid = q.id ' .
+                    'INNER JOIN {kilman_survey} s ON q.sid = s.id ' .
+                    $groupsql .
+                    'WHERE s.id = :surveyid AND r.complete = :status' . $groupcnd;
             $params['surveyid'] = $this->sid;
             $params['status'] = 'y';
         } else {
             $sql = 'SELECT r.* ' .
-                'FROM {kilman_response} r ' .
-                $groupsql .
-                'WHERE r.kilmanid = :kilmanid AND r.complete = :status' . $groupcnd;
+                    'FROM {kilman_response} r ' .
+                    $groupsql .
+                    'WHERE r.kilmanid = :kilmanid AND r.complete = :status' . $groupcnd;
             $params['kilmanid'] = $this->id;
             $params['status'] = 'y';
         }
@@ -834,7 +817,7 @@ class kilman {
                     break;
             }
             // Qdependquestion, parenttype and qdependchoice fields to be used in preview mode.
-            $question->dependencies[$did]->qdependquestion = 'q'.$dependquestion->id;
+            $question->dependencies[$did]->qdependquestion = 'q' . $dependquestion->id;
             $question->dependencies[$did]->qdependchoice = $qdependchoice;
             $question->dependencies[$did]->parenttype = $dependquestion->type_id;
             // Other fields to be used in Questions edit mode.
@@ -842,7 +825,7 @@ class kilman {
             $question->dependencies[$did]->name = $question->name;
             $question->dependencies[$did]->content = $question->content;
             $question->dependencies[$did]->parentposition = $dependquestion->position;
-            $question->dependencies[$did]->parent = $dependquestion->name.'->'.$dependchoice;
+            $question->dependencies[$did]->parent = $dependquestion->name . '->' . $dependchoice;
         }
         return true;
     }
@@ -867,7 +850,7 @@ class kilman {
 
     // Display Methods.
 
-    public function print_survey($userid=false, $quser) {
+    public function print_survey($userid = false, $quser) {
         global $SESSION, $CFG;
 
         $formdata = new stdClass();
@@ -888,10 +871,9 @@ class kilman {
 
         $numsections = isset($this->questionsbysec) ? count($this->questionsbysec) : 0;    // Indexed by section.
         $msg = '';
-        $action = $CFG->wwwroot.'/mod/kilman/complete.php?id='.$this->cm->id;
+        $action = $CFG->wwwroot . '/mod/kilman/complete.php?id=' . $this->cm->id;
 
         // TODO - Need to rework this. Too much crossover with ->view method.
-
         // Skip logic :: if this is page 1, it cannot be the end page with no questions on it!
         if ($formdata->sec == 1) {
             $SESSION->kilman->end = false;
@@ -972,12 +954,12 @@ class kilman {
         $formdatareferer = !empty($formdata->referer) ? htmlspecialchars($formdata->referer) : '';
         $formdatarid = isset($formdata->rid) ? $formdata->rid : '0';
         $this->page->add_to_page('formstart', $this->renderer->complete_formstart($action, ['referer' => $formdatareferer,
-            'a' => $this->id, 'sid' => $this->survey->id, 'rid' => $formdatarid, 'sec' => $formdata->sec, 'sesskey' => sesskey()]));
+                    'a' => $this->id, 'sid' => $this->survey->id, 'rid' => $formdatarid, 'sec' => $formdata->sec, 'sesskey' => sesskey()]));
         if (isset($this->questions) && $numsections) { // Sanity check.
             $this->survey_render($formdata->sec, $msg, $formdata);
             $controlbuttons = [];
             if ($formdata->sec > 1) {
-                $controlbuttons['prev'] = ['type' => 'submit', 'value' => '<< '.get_string('previouspage', 'kilman')];
+                $controlbuttons['prev'] = ['type' => 'submit', 'value' => '<< ' . get_string('previouspage', 'kilman')];
             }
             if ($this->resume) {
                 $controlbuttons['resume'] = ['type' => 'submit', 'value' => get_string('save', 'kilman')];
@@ -989,12 +971,11 @@ class kilman {
                 $controlbuttons['submittype'] = ['type' => 'hidden', 'value' => 'Submit Survey'];
                 $controlbuttons['submit'] = ['type' => 'submit', 'value' => get_string('submitsurvey', 'kilman')];
             } else {
-                $controlbuttons['next'] = ['type' => 'submit', 'value' => get_string('nextpage', 'kilman').' >>'];
+                $controlbuttons['next'] = ['type' => 'submit', 'value' => get_string('nextpage', 'kilman') . ' >>'];
             }
             $this->page->add_to_page('controlbuttons', $this->renderer->complete_controlbuttons($controlbuttons));
         } else {
-            $this->page->add_to_page('controlbuttons',
-                $this->renderer->complete_controlbuttons(get_string('noneinuse', 'kilman')));
+            $this->page->add_to_page('controlbuttons', $this->renderer->complete_controlbuttons(get_string('noneinuse', 'kilman')));
         }
         $this->page->add_to_page('formend', $this->renderer->complete_formend());
 
@@ -1011,8 +992,7 @@ class kilman {
         $numsections = isset($this->questionsbysec) ? count($this->questionsbysec) : 0;
         if ($section > $numsections) {
             $formdata->sec = $numsections;
-            $this->page->add_to_page('notifications',
-                $this->renderer->notification(get_string('finished', 'kilman'), \core\output\notification::NOTIFY_WARNING));
+            $this->page->add_to_page('notifications', $this->renderer->notification(get_string('finished', 'kilman'), \core\output\notification::NOTIFY_WARNING));
             return(false);  // Invalid section.
         }
 
@@ -1038,8 +1018,7 @@ class kilman {
             }
             // Need kilman id to get the kilman object in sectiontext (Label) question class.
             $formdata->kilman_id = $this->id;
-            $this->page->add_to_page('questions',
-                $this->renderer->question_output($question, $formdata, [], $i, $this->usehtmleditor));
+            $this->page->add_to_page('questions', $this->renderer->question_output($question, $formdata, [], $i, $this->usehtmleditor));
         }
 
         $this->print_survey_end($section, $numsections);
@@ -1047,9 +1026,9 @@ class kilman {
         return;
     }
 
-    private function print_survey_start($message, $section, $numsections, $hasrequired, $rid='', $blankkilman=false) {
+    private function print_survey_start($message, $section, $numsections, $hasrequired, $rid = '', $blankkilman = false) {
         global $CFG, $DB;
-        require_once($CFG->libdir.'/filelib.php');
+        require_once($CFG->libdir . '/filelib.php');
 
         $userid = '';
         $resp = '';
@@ -1059,7 +1038,7 @@ class kilman {
         // Available group modes (0 = no groups; 1 = separate groups; 2 = visible groups).
         if ($rid) {
             $courseid = $this->course->id;
-            if ($resp = $DB->get_record('kilman_response', array('id' => $rid)) ) {
+            if ($resp = $DB->get_record('kilman_response', array('id' => $rid))) {
                 if ($this->respondenttype == 'fullname') {
                     $userid = $resp->userid;
                     // Display name of group(s) that student belongs to... if kilman is set to Groups separate or visible.
@@ -1068,16 +1047,16 @@ class kilman {
                             if (count($groups) == 1) {
                                 $group = current($groups);
                                 $currentgroupid = $group->id;
-                                $groupname = ' ('.get_string('group').': '.$group->name.')';
+                                $groupname = ' (' . get_string('group') . ': ' . $group->name . ')';
                             } else {
-                                $groupname = ' ('.get_string('groups').': ';
+                                $groupname = ' (' . get_string('groups') . ': ';
                                 foreach ($groups as $group) {
-                                    $groupname .= $group->name.', ';
+                                    $groupname .= $group->name . ', ';
                                 }
-                                $groupname = substr($groupname, 0, strlen($groupname) - 2).')';
+                                $groupname = substr($groupname, 0, strlen($groupname) - 2) . ')';
                             }
                         } else {
-                            $groupname = ' ('.get_string('groupnonmembers').')';
+                            $groupname = ' (' . get_string('groupnonmembers') . ')';
                         }
                     }
 
@@ -1101,28 +1080,28 @@ class kilman {
                 }
             }
             if ($this->respondenttype == 'anonymous') {
-                $ruser = '- '.get_string('anonymous', 'kilman').' -';
+                $ruser = '- ' . get_string('anonymous', 'kilman') . ' -';
             } else {
                 // JR DEV comment following line out if you do NOT want time submitted displayed in Anonymous surveys.
                 if ($resp->submitted) {
-                    $timesubmitted = '&nbsp;'.get_string('submitted', 'kilman').'&nbsp;'.userdate($resp->submitted);
+                    $timesubmitted = '&nbsp;' . get_string('submitted', 'kilman') . '&nbsp;' . userdate($resp->submitted);
                 }
             }
         }
         if ($ruser) {
-            $respinfo = get_string('respondent', 'kilman').': <strong>'.$ruser.'</strong>';
+            $respinfo = get_string('respondent', 'kilman') . ': <strong>' . $ruser . '</strong>';
             if ($this->survey_is_public()) {
                 // For a public kilman, look for the course that used it.
                 $coursename = '';
                 $sql = 'SELECT q.id, q.course, c.fullname ' .
-                       'FROM {kilman_response} qr ' .
-                       'INNER JOIN {kilman} q ON qr.kilmanid = q.id ' .
-                       'INNER JOIN {course} c ON q.course = c.id ' .
-                       'WHERE qr.id = ? AND qr.complete = ? ';
+                        'FROM {kilman_response} qr ' .
+                        'INNER JOIN {kilman} q ON qr.kilmanid = q.id ' .
+                        'INNER JOIN {course} c ON q.course = c.id ' .
+                        'WHERE qr.id = ? AND qr.complete = ? ';
                 if ($record = $DB->get_record_sql($sql, [$rid, 'y'])) {
                     $coursename = $record->fullname;
                 }
-                $respinfo .= ' '.get_string('course'). ': '.$coursename;
+                $respinfo .= ' ' . get_string('course') . ': ' . $coursename;
             }
             $respinfo .= $groupname;
             $respinfo .= $timesubmitted;
@@ -1132,18 +1111,16 @@ class kilman {
         // We don't want to display the print icon in the print popup window itself!
         if ($this->capabilities->printblank && $blankkilman && $section == 1) {
             // Open print friendly as popup window.
-            $linkname = '&nbsp;'.get_string('printblank', 'kilman');
+            $linkname = '&nbsp;' . get_string('printblank', 'kilman');
             $title = get_string('printblanktooltip', 'kilman');
-            $url = '/mod/kilman/print.php?qid='.$this->id.'&amp;rid=0&amp;'.'courseid='.$this->course->id.'&amp;sec=1';
+            $url = '/mod/kilman/print.php?qid=' . $this->id . '&amp;rid=0&amp;' . 'courseid=' . $this->course->id . '&amp;sec=1';
             $options = array('menubar' => true, 'location' => false, 'scrollbars' => true, 'resizable' => true,
                 'height' => 600, 'width' => 800, 'title' => $title);
             $name = 'popup';
             $link = new moodle_url($url);
             $action = new popup_action('click', $link, $name, $options);
             $class = "floatprinticon";
-            $this->page->add_to_page('printblank',
-                $this->renderer->action_link($link, $linkname, $action, array('class' => $class, 'title' => $title),
-                    new pix_icon('t/print', $title)));
+            $this->page->add_to_page('printblank', $this->renderer->action_link($link, $linkname, $action, array('class' => $class, 'title' => $title), new pix_icon('t/print', $title)));
         }
         if ($section == 1) {
             if (!empty($this->survey->title)) {
@@ -1153,8 +1130,7 @@ class kilman {
                 $this->page->add_to_page('subtitle', clean_text($this->survey->subtitle, FORMAT_HTML));
             }
             if ($this->survey->info) {
-                $infotext = file_rewrite_pluginfile_urls($this->survey->info, 'pluginfile.php',
-                    $this->context->id, 'mod_kilman', 'info', $this->survey->id);
+                $infotext = file_rewrite_pluginfile_urls($this->survey->info, 'pluginfile.php', $this->context->id, 'mod_kilman', 'info', $this->survey->id);
                 $this->page->add_to_page('addinfo', $infotext);
             }
         }
@@ -1174,16 +1150,15 @@ class kilman {
             $a = new stdClass();
             $a->page = $section;
             $a->totpages = $numsections;
-            $this->page->add_to_page('pageinfo',
-                $this->renderer->container(get_string('pageof', 'kilman', $a).'&nbsp;&nbsp;', 'surveyPage'));
+            $this->page->add_to_page('pageinfo', $this->renderer->container(get_string('pageof', 'kilman', $a) . '&nbsp;&nbsp;', 'surveyPage'));
         }
     }
 
     // Blankkilman : if we are printing a blank kilman.
-    public function survey_print_render($message = '', $referer='', $courseid, $rid=0, $blankkilman=false) {
+    public function survey_print_render($message = '', $referer = '', $courseid, $rid = 0, $blankkilman = false) {
         global $DB, $CFG;
 
-        if (! $course = $DB->get_record("course", array("id" => $courseid))) {
+        if (!$course = $DB->get_record("course", array("id" => $courseid))) {
             print_error('incorrectcourseid', 'kilman');
         }
 
@@ -1217,9 +1192,8 @@ class kilman {
             $i += count($this->questionsbysec[$j - 1]);
         }
 
-        $action = $CFG->wwwroot.'/mod/kilman/preview.php?id='.$this->cm->id;
-        $this->page->add_to_page('formstart',
-            $this->renderer->complete_formstart($action));
+        $action = $CFG->wwwroot . '/mod/kilman/preview.php?id=' . $this->cm->id;
+        $this->page->add_to_page('formstart', $this->renderer->complete_formstart($action));
         // Print all sections.
         $formdata = new stdClass();
         $errors = 1;
@@ -1232,10 +1206,9 @@ class kilman {
                 $errormessage = $this->response_check_format($s, $formdata);
                 if ($errormessage) {
                     if ($numsections > 1) {
-                        $pageerror = get_string('page', 'kilman').' '.$s.' : ';
+                        $pageerror = get_string('page', 'kilman') . ' ' . $s . ' : ';
                     }
-                    $this->page->add_to_page('notifications',
-                        $this->renderer->notification($pageerror.$errormessage, \core\output\notification::NOTIFY_ERROR));
+                    $this->page->add_to_page('notifications', $this->renderer->notification($pageerror . $errormessage, \core\output\notification::NOTIFY_ERROR));
                     $errors++;
                 }
                 $s ++;
@@ -1250,16 +1223,14 @@ class kilman {
             $allqdependants = [];
         }
         if ($errors == 0) {
-            $this->page->add_to_page('message',
-                $this->renderer->notification(get_string('submitpreviewcorrect', 'kilman'),
-                    \core\output\notification::NOTIFY_SUCCESS));
+            $this->page->add_to_page('message', $this->renderer->notification(get_string('submitpreviewcorrect', 'kilman'), \core\output\notification::NOTIFY_SUCCESS));
         }
 
         $page = 1;
         foreach ($this->questionsbysec as $section) {
             $output = '';
             if ($numsections > 1) {
-                $output .= $this->renderer->print_preview_pagenumber(get_string('page', 'kilman').' '.$page);
+                $output .= $this->renderer->print_preview_pagenumber(get_string('page', 'kilman') . ' ' . $page);
                 $page++;
             }
             foreach ($section as $question) {
@@ -1278,9 +1249,8 @@ class kilman {
         }
         // End of questions.
         if ($referer == 'preview' && !$blankkilman) {
-            $url = $CFG->wwwroot.'/mod/kilman/preview.php?id='.$this->cm->id;
-            $this->page->add_to_page('formend',
-                $this->renderer->print_preview_formend($url, get_string('submitpreview', 'kilman'), get_string('reset')));
+            $url = $CFG->wwwroot . '/mod/kilman/preview.php?id=' . $this->cm->id;
+            $this->page->add_to_page('formend', $this->renderer->print_preview_formend($url, get_string('submitpreview', 'kilman'), get_string('reset')));
         }
         return;
     }
@@ -1289,7 +1259,6 @@ class kilman {
         global $DB;
 
         $errstr = ''; // TODO: notused!
-
         // New survey.
         if (empty($this->survey->id)) {
             // Create a new survey in the database.
@@ -1310,7 +1279,7 @@ class kilman {
             $this->add_survey($this->survey->id);
 
             if (!$this->survey->id) {
-                $errstr = get_string('errnewname', 'kilman') .' [ :  ]'; // TODO: notused!
+                $errstr = get_string('errnewname', 'kilman') . ' [ :  ]'; // TODO: notused!
                 return(false);
             }
         } else {
@@ -1345,7 +1314,7 @@ class kilman {
 
             $result = $DB->update_record('kilman_survey', $surveyrecord);
             if (!$result) {
-                $errstr = get_string('warning', 'kilman').' [ :  ]';  // TODO: notused!
+                $errstr = get_string('warning', 'kilman') . ' [ :  ]';  // TODO: notused!
                 return(false);
             }
         }
@@ -1354,6 +1323,7 @@ class kilman {
     }
 
     /* Creates an editable copy of a survey. */
+
     public function survey_copy($owner) {
         global $DB;
 
@@ -1372,7 +1342,7 @@ class kilman {
         $i = 0;
         $name = $survey->name;
         while ($DB->count_records('kilman_survey', array('name' => $name)) > 0) {
-            $name = $survey->name.(++$i);
+            $name = $survey->name . ( ++$i);
         }
         if ($i) {
             $survey->name .= $i;
@@ -1480,11 +1450,11 @@ class kilman {
             }
             if (!$question->response_complete($formdata)) {
                 $missing++;
-                $strmissing .= get_string('num', 'kilman').$qnum.'. ';
+                $strmissing .= get_string('num', 'kilman') . $qnum . '. ';
             }
             if (!$question->response_valid($formdata)) {
                 $wrongformat++;
-                $strwrongformat .= get_string('num', 'kilman').$qnum.'. ';
+                $strwrongformat .= get_string('num', 'kilman') . $qnum . '. ';
             }
         }
         $message = '';
@@ -1499,9 +1469,9 @@ class kilman {
                 $strmissing = '';
             }
             if ($missing == 1) {
-                $message = get_string('missingquestion', 'kilman').$strmissing;
+                $message = get_string('missingquestion', 'kilman') . $strmissing;
             } else {
-                $message = get_string('missingquestions', 'kilman').$strmissing;
+                $message = get_string('missingquestions', 'kilman') . $strmissing;
             }
             if ($wrongformat) {
                 $message .= '<br />';
@@ -1512,9 +1482,9 @@ class kilman {
                 $message .= get_string('wronganswers', 'kilman');
             } else {
                 if ($wrongformat == 1) {
-                    $message .= get_string('wrongformat', 'kilman').$strwrongformat;
+                    $message .= get_string('wrongformat', 'kilman') . $strwrongformat;
                 } else {
-                    $message .= get_string('wrongformats', 'kilman').$strwrongformat;
+                    $message .= get_string('wrongformats', 'kilman') . $strwrongformat;
                 }
             }
         }
@@ -1535,7 +1505,7 @@ class kilman {
 
             // Skip logic.
             $numsections = isset($this->questionsbysec) ? count($this->questionsbysec) : 0;
-            $sec = min($numsections , $sec);
+            $sec = min($numsections, $sec);
 
             /* get question_id's in this section */
             $qids = array();
@@ -1548,7 +1518,6 @@ class kilman {
                 list($qsql, $params) = $DB->get_in_or_equal($qids);
                 $qsql = ' AND question_id ' . $qsql;
             }
-
         } else {
             /* delete all */
             $qsql = '';
@@ -1558,8 +1527,8 @@ class kilman {
         /* delete values */
         $select = 'response_id = \'' . $rid . '\' ' . $qsql;
         foreach (array('response_bool', 'resp_single', 'resp_multiple', 'response_rank', 'response_text',
-                     'response_other', 'response_date') as $tbl) {
-            $DB->delete_records_select('kilman_'.$tbl, $select, $params);
+    'response_other', 'response_date') as $tbl) {
+            $DB->delete_records_select('kilman_' . $tbl, $select, $params);
         }
     }
 
@@ -1572,9 +1541,9 @@ class kilman {
         foreach ($vals as $id => $arr) {
             if (isset($arr[0]) && is_array($arr[0])) {
                 // Multiple.
-                $varr->{'q'.$id} = array_map('array_pop', $arr);
+                $varr->{'q' . $id} = array_map('array_pop', $arr);
             } else {
-                $varr->{'q'.$id} = array_pop($arr);
+                $varr->{'q' . $id} = array_pop($arr);
             }
         }
     }
@@ -1585,17 +1554,35 @@ class kilman {
         reset($vals);
         foreach ($vals as $id => $arr) {
             if (strstr($id, '_') && isset($arr[4])) { // Single OR multiple with !other choice selected.
-                $varr->{'q'.$id} = $arr[4];
+                $varr->{'q' . $id} = $arr[4];
             } else {
                 if (isset($arr[0]) && is_array($arr[0])) { // Multiple.
-                    $varr->{'q'.$id} = array_map('array_pop', $arr);
+                    $varr->{'q' . $id} = array_map('array_pop', $arr);
                 } else { // Boolean, rate and other.
-                    $varr->{'q'.$id} = array_pop($arr);
+                    $varr->{'q' . $id} = array_pop($arr);
                 }
             }
         }
     }
 
+    
+    public function response_import_allpdf($rid, &$varr) {
+
+        $vals = $this->response_select($rid, 'content');
+        reset($vals);
+        foreach ($vals as $id => $arr) {
+            if (strstr($id, '_') && isset($arr[4])) { // Single OR multiple with !other choice selected.
+                $varr->{'q' . $id} = $arr[4];
+            } else {
+                if (isset($arr[0]) && is_array($arr[0])) { // Multiple.
+                    $varr->{'q' . $id} = array_map('array_pop', $arr);
+                } else { // Boolean, rate and other.
+                    $varr->{'q' . $id} = array_pop($arr);
+                }
+            }
+        }
+    }
+    
     private function response_commit($rid) {
         global $DB;
 
@@ -1621,7 +1608,6 @@ class kilman {
             $fields = 'id, userid';
             $params = ['id' => $rid, 'kilmanid' => $this->id, 'userid' => $userid, 'complete' => 'n'];
             return ($DB->get_record('kilman_response', $params, $fields) !== false) ? $rid : '';
-
         } else {
             // Find latest in progress rid.
             $params = ['kilmanid' => $this->id, 'userid' => $userid, 'complete' => 'n'];
@@ -1653,14 +1639,14 @@ class kilman {
         $max = 0;
 
         foreach (array('response_bool', 'resp_single', 'resp_multiple', 'response_rank', 'response_text',
-                     'response_other', 'response_date') as $tbl) {
-            $sql = 'SELECT MAX(q.position) as num FROM {kilman_'.$tbl.'} a, {kilman_question} q '.
-                'WHERE a.response_id = ? AND '.
-                'q.id = a.question_id AND '.
-                'q.surveyid = ? AND '.
-                'q.deleted = \'n\'';
+    'response_other', 'response_date') as $tbl) {
+            $sql = 'SELECT MAX(q.position) as num FROM {kilman_' . $tbl . '} a, {kilman_question} q ' .
+                    'WHERE a.response_id = ? AND ' .
+                    'q.id = a.question_id AND ' .
+                    'q.surveyid = ? AND ' .
+                    'q.deleted = \'n\'';
             if ($record = $DB->get_record_sql($sql, array($rid, $this->sid))) {
-                $newmax = (int)$record->num;
+                $newmax = (int) $record->num;
                 if ($newmax > $max) {
                     $max = $newmax;
                 }
@@ -1726,7 +1712,7 @@ class kilman {
             if ($this->respondenttype != 'anonymous') {
                 $info->userfrom = $USER;
                 $info->username = fullname($info->userfrom, true);
-                $info->profileurl = $CFG->wwwroot.'/user/view.php?id='.$info->userfrom->id.'&course='.$this->course->id;
+                $info->profileurl = $CFG->wwwroot . '/user/view.php?id=' . $info->userfrom->id . '&course=' . $this->course->id;
                 $langstringtext = 'submissionnotificationtextuser';
                 $langstringhtml = 'submissionnotificationhtmluser';
             } else {
@@ -1737,8 +1723,8 @@ class kilman {
                 $langstringhtml = 'submissionnotificationhtmlanon';
             }
             $info->name = format_string($this->name);
-            $info->submissionurl = $CFG->wwwroot.'/mod/kilman/report.php?action=vresp&sid='.$this->survey->id.
-                '&rid='.$rid.'&instance='.$this->id;
+            $info->submissionurl = $CFG->wwwroot . '/mod/kilman/report.php?action=vresp&sid=' . $this->survey->id .
+                    '&rid=' . $rid . '&instance=' . $this->id;
             $info->coursename = $this->course->fullname;
 
             $info->postsubject = get_string('submissionnotificationsubject', 'kilman');
@@ -1767,21 +1753,21 @@ class kilman {
      */
     private function send_message($info, $eventtype) {
         $eventdata = new \core\message\message();
-        $eventdata->courseid         = $this->course->id;
-        $eventdata->modulename       = 'kilman';
-        $eventdata->userfrom         = $info->userfrom;
-        $eventdata->userto           = $info->userto;
-        $eventdata->subject          = $info->postsubject;
-        $eventdata->fullmessage      = $info->posttext;
+        $eventdata->courseid = $this->course->id;
+        $eventdata->modulename = 'kilman';
+        $eventdata->userfrom = $info->userfrom;
+        $eventdata->userto = $info->userto;
+        $eventdata->subject = $info->postsubject;
+        $eventdata->fullmessage = $info->posttext;
         $eventdata->fullmessageformat = FORMAT_PLAIN;
-        $eventdata->fullmessagehtml  = $info->posthtml;
-        $eventdata->smallmessage     = $info->postsubject;
+        $eventdata->fullmessagehtml = $info->posthtml;
+        $eventdata->smallmessage = $info->postsubject;
 
-        $eventdata->name            = $eventtype;
-        $eventdata->component       = 'mod_kilman';
-        $eventdata->notification    = 1;
-        $eventdata->contexturl      = $info->submissionurl;
-        $eventdata->contexturlname  = $info->name;
+        $eventdata->name = $eventtype;
+        $eventdata->component = 'mod_kilman';
+        $eventdata->notification = 1;
+        $eventdata->contexturl = $info->submissionurl;
+        $eventdata->contexturlname = $info->name;
 
         message_send($eventdata);
     }
@@ -1794,8 +1780,7 @@ class kilman {
      */
     protected function get_notifiable_users($userid) {
         // Potential users should be active users only.
-        $potentialusers = get_enrolled_users($this->context, 'mod/kilman:submissionnotification',
-            null, 'u.*', null, null, null, true);
+        $potentialusers = get_enrolled_users($this->context, 'mod/kilman:submissionnotification', null, 'u.*', null, null, null, true);
 
         $notifiableusers = [];
         if (groups_get_activity_groupmode($this->cm) == SEPARATEGROUPS) {
@@ -1932,7 +1917,6 @@ class kilman {
                     $answertext .= $question->choices[$answers->$rqid]->content;
                 }
                 $response->answers[] = $answertext;
-
             } else if (isset($answers->$rqid)) {
                 $response->answers[] = $answers->$rqid;
             }
@@ -1960,22 +1944,22 @@ class kilman {
         for ($i = 0; $i < count($answers[0]); $i++) {
             $sep = ' : ';
 
-            switch($i) {
+            switch ($i) {
                 case 1:
                     $sep = ' ';
                     break;
                 case 4:
-                    $formatted['plaintext'] .= get_string('user').' ';
-                    $formatted['html'] .= get_string('user').' ';
+                    $formatted['plaintext'] .= get_string('user') . ' ';
+                    $formatted['html'] .= get_string('user') . ' ';
                     break;
                 case 6:
                     if ($this->respondenttype != 'anonymous') {
-                        $formatted['html'] .= get_string('email').$sep.$USER->email. $endhtml;
-                        $formatted['plaintext'] .= get_string('email'). $sep. $USER->email. $endplaintext;
+                        $formatted['html'] .= get_string('email') . $sep . $USER->email . $endhtml;
+                        $formatted['plaintext'] .= get_string('email') . $sep . $USER->email . $endplaintext;
                     }
             }
-            $formatted['html'] .= $answers[0][$i].$sep.$answers[1][$i]. $endhtml;
-            $formatted['plaintext'] .= $answers[0][$i].$sep.$answers[1][$i]. $endplaintext;
+            $formatted['html'] .= $answers[0][$i] . $sep . $answers[1][$i] . $endhtml;
+            $formatted['plaintext'] .= $answers[0][$i] . $sep . $answers[1][$i] . $endplaintext;
         }
 
         return $formatted;
@@ -2008,15 +1992,15 @@ class kilman {
         $endhtml = "\r\n<br>";
         $endplaintext = "\r\n";
 
-        $subject = get_string('surveyresponse', 'kilman') .": $name [$rid]";
-        $url = $CFG->wwwroot.'/mod/kilman/report.php?action=vresp&amp;sid='.$this->survey->id.
-            '&amp;rid='.$rid.'&amp;instance='.$this->id;
+        $subject = get_string('surveyresponse', 'kilman') . ": $name [$rid]";
+        $url = $CFG->wwwroot . '/mod/kilman/report.php?action=vresp&amp;sid=' . $this->survey->id .
+                '&amp;rid=' . $rid . '&amp;instance=' . $this->id;
 
         // Html and plaintext body.
-        $bodyhtml        = '<a href="'.$url.'">'.$url.'</a>'.$endhtml;
-        $bodyplaintext   = $url.$endplaintext;
-        $bodyhtml       .= get_string('surveyresponse', 'kilman') .' "'.$name.'"'.$endhtml;
-        $bodyplaintext  .= get_string('surveyresponse', 'kilman') .' "'.$name.'"'.$endplaintext;
+        $bodyhtml = '<a href="' . $url . '">' . $url . '</a>' . $endhtml;
+        $bodyplaintext = $url . $endplaintext;
+        $bodyhtml .= get_string('surveyresponse', 'kilman') . ' "' . $name . '"' . $endhtml;
+        $bodyplaintext .= get_string('surveyresponse', 'kilman') . ' "' . $name . '"' . $endplaintext;
 
         $bodyhtml .= $answers['html'];
         $bodyplaintext .= $answers['plaintext'];
@@ -2042,7 +2026,7 @@ class kilman {
         return $return;
     }
 
-    public function response_insert($section, $rid, $userid, $resume=false) {
+    public function response_insert($section, $rid, $userid, $resume = false) {
         global $DB;
 
         $record = new stdClass();
@@ -2078,9 +2062,9 @@ class kilman {
                 // NOTE *** $val really should be a value obtained from the caller or somewhere else.
                 // Note that "optional_param" accepting arrays is deprecated for optional_param_array.
                 if ($question->responsetable == 'resp_multiple') {
-                    $val = optional_param_array('q'.$question->id, '', PARAM_RAW);
+                    $val = optional_param_array('q' . $question->id, '', PARAM_RAW);
                 } else {
-                    $val = optional_param('q'.$question->id, '', PARAM_RAW);
+                    $val = optional_param('q' . $question->id, '', PARAM_RAW);
                 }
                 $question->insert_response($rid, $val);
             }
@@ -2088,7 +2072,7 @@ class kilman {
         return($rid);
     }
 
-    private function response_select($rid, $col = null, $csvexport = false, $choicecodes=0, $choicetext=1) {
+    private function response_select($rid, $col = null, $csvexport = false, $choicecodes = 0, $choicetext = 1) {
         if ($col == null) {
             $col = '';
         }
@@ -2097,7 +2081,7 @@ class kilman {
         }
         if (is_array($col) && count($col) > 0) {
             $callback = function($a) {
-                return 'q.'.$a;
+                return 'q.' . $a;
             };
             $col = ',' . implode(',', array_map($callback, $col));
         }
@@ -2126,7 +2110,7 @@ class kilman {
     private function response_goto_thankyou() {
         global $CFG, $USER, $DB;
 
-        $select = 'id = '.$this->survey->id;
+        $select = 'id = ' . $this->survey->id;
         $fields = 'thanks_page, thank_head, thank_body';
         if ($result = $DB->get_record_select('kilman_survey', $select, null, $fields)) {
             $thankurl = $result->thanks_page;
@@ -2145,13 +2129,13 @@ class kilman {
             echo '
                 <script language="JavaScript" type="text/javascript">
                 <!--
-                window.location="'.$thankurl.'"
+                window.location="' . $thankurl . '"
                 //-->
                 </script>
                 <noscript>
                 <h2 class="thankhead">Thank You for completing this survey.</h2>
                 <blockquote class="thankbody">Please click
-                <a href="'.$thankurl.'">here</a> to continue.</blockquote>
+                <a href="' . $thankurl . '">here</a> to continue.</blockquote>
                 </noscript>
             ';
             exit;
@@ -2160,9 +2144,7 @@ class kilman {
             $thankhead = get_string('thank_head', 'kilman');
         }
         $this->page->add_to_page('title', $thankhead);
-        $this->page->add_to_page('addinfo',
-            format_text(file_rewrite_pluginfile_urls($thankbody, 'pluginfile.php',
-                $this->context->id, 'mod_kilman', 'thankbody', $this->survey->id), FORMAT_HTML, ['noclean' => true]));
+        $this->page->add_to_page('addinfo', format_text(file_rewrite_pluginfile_urls($thankbody, 'pluginfile.php', $this->context->id, 'mod_kilman', 'thankbody', $this->survey->id), FORMAT_HTML, ['noclean' => true]));
         // Default set currentgroup to view all participants.
         // TODO why not set to current respondent's groupid (if any)?
         $currentgroupid = 0;
@@ -2171,14 +2153,12 @@ class kilman {
             $currentgroupid = 0;
         }
         if ($this->capabilities->readownresponses) {
-            $this->page->add_to_page('message',
-                ('<a href="'.$CFG->wwwroot.'/mod/kilman/myreport.php?id='.
-                    $this->cm->id.'&amp;instance='.$this->cm->instance.'&amp;user='.$USER->id.'&byresponse=0&action=vresp">'.
-                    get_string("continue").'</a>'));
+            $this->page->add_to_page('message', ('<a href="' . $CFG->wwwroot . '/mod/kilman/myreport.php?id=' .
+                    $this->cm->id . '&amp;instance=' . $this->cm->instance . '&amp;user=' . $USER->id . '&byresponse=0&action=vresp">' .
+                    get_string("continue") . '</a>'));
         } else {
-            $this->page->add_to_page('message',
-                ('<a href="'.$CFG->wwwroot.'/course/view.php?id='.$this->course->id.'">'.
-                    get_string("continue").'</a>'));
+            $this->page->add_to_page('message', ('<a href="' . $CFG->wwwroot . '/course/view.php?id=' . $this->course->id . '">' .
+                    get_string("continue") . '</a>'));
         }
         return;
     }
@@ -2186,13 +2166,10 @@ class kilman {
     private function response_goto_saved($url) {
         global $CFG;
         $resumesurvey = get_string('resumesurvey', 'kilman');
-        $savedprogress = get_string('savedprogress', 'kilman', '<strong>'.$resumesurvey.'</strong>');
+        $savedprogress = get_string('savedprogress', 'kilman', '<strong>' . $resumesurvey . '</strong>');
 
-        $this->page->add_to_page('notifications',
-            $this->renderer->notification($savedprogress, \core\output\notification::NOTIFY_SUCCESS));
-        $this->page->add_to_page('respondentinfo',
-            $this->renderer->homelink($CFG->wwwroot.'/course/view.php?id='.$this->course->id,
-                get_string("backto", "moodle", $this->course->fullname)));
+        $this->page->add_to_page('notifications', $this->renderer->notification($savedprogress, \core\output\notification::NOTIFY_SUCCESS));
+        $this->page->add_to_page('respondentinfo', $this->renderer->homelink($CFG->wwwroot . '/course/view.php?id=' . $this->course->id, get_string("backto", "moodle", $this->course->fullname)));
         return;
     }
 
@@ -2237,7 +2214,7 @@ class kilman {
             $i++;
         }
 
-        $url = $CFG->wwwroot.'/mod/kilman/report.php?action=vresp&group='.$currentgroupid.'&individualresponse=1';
+        $url = $CFG->wwwroot . '/mod/kilman/report.php?action=vresp&group=' . $currentgroupid . '&individualresponse=1';
         if (!$byresponse) {     // Display navbar.
             // Build navbar.
             $navbar = new \stdClass();
@@ -2249,14 +2226,14 @@ class kilman {
                 $pos = $currpos - 1;
                 $title = '';
                 $firstuserfullname = '';
-                $navbar->firstrespondent = ['url' => ($url.'&rid='.$firstrid)];
-                $navbar->previous = ['url' => ($url.'&rid='.$prevrid)];
+                $navbar->firstrespondent = ['url' => ($url . '&rid=' . $firstrid)];
+                $navbar->previous = ['url' => ($url . '&rid=' . $prevrid)];
                 if ($isfullname) {
                     $responsedate = userdate($ridssub[$pos]);
                     $title = $ridsuserfullname[$pos];
                     // Only add date if more than one response by a student.
                     if ($ridsuserid[$pos] == $ridsuserid[$currpos]) {
-                        $title .= ' | '.$responsedate;
+                        $title .= ' | ' . $responsedate;
                     }
                     $firstuserfullname = $ridsuserfullname[0];
                 }
@@ -2269,51 +2246,49 @@ class kilman {
                 $responsedate = '';
                 $title = '';
                 $lastuserfullname = '';
-                $navbar->lastrespondent = ['url' => ($url.'&rid='.$lastrid)];
-                $navbar->next = ['url' => ($url.'&rid='.$nextrid)];
+                $navbar->lastrespondent = ['url' => ($url . '&rid=' . $lastrid)];
+                $navbar->next = ['url' => ($url . '&rid=' . $nextrid)];
                 if ($isfullname) {
                     $responsedate = userdate($ridssub[$pos]);
                     $title = $ridsuserfullname[$pos];
                     // Only add date if more than one response by a student.
                     if ($ridsuserid[$pos] == $ridsuserid[$currpos]) {
-                        $title .= ' | '.$responsedate;
+                        $title .= ' | ' . $responsedate;
                     }
                     $lastuserfullname = $ridsuserfullname[$total - 1];
                 }
                 $navbar->lastrespondent['title'] = $lastuserfullname;
                 $navbar->next['title'] = $title;
             }
-            $url = $CFG->wwwroot.'/mod/kilman/report.php?action=vresp&byresponse=1&group='.$currentgroupid;
+            $url = $CFG->wwwroot . '/mod/kilman/report.php?action=vresp&byresponse=1&group=' . $currentgroupid;
             // Display navbar.
             $navbar->listlink = $url;
 
             // Display a "print this response" icon here in prevision of total removal of tabs in version 2.6.
-            $linkname = '&nbsp;'.get_string('print', 'kilman');
-            $url = '/mod/kilman/print.php?qid='.$this->id.'&rid='.$currrid.
-                '&courseid='.$this->course->id.'&sec=1';
+            $linkname = '&nbsp;' . get_string('print', 'kilman');
+            $url = '/mod/kilman/print.php?qid=' . $this->id . '&rid=' . $currrid .
+                    '&courseid=' . $this->course->id . '&sec=1';
             $title = get_string('printtooltip', 'kilman');
             $options = array('menubar' => true, 'location' => false, 'scrollbars' => true,
                 'resizable' => true, 'height' => 600, 'width' => 800);
             $name = 'popup';
             $link = new moodle_url($url);
             $action = new popup_action('click', $link, $name, $options);
-            $actionlink = $this->renderer->action_link($link, $linkname, $action, ['title' => $title],
-                new pix_icon('t/print', $title));
+            $actionlink = $this->renderer->action_link($link, $linkname, $action, ['title' => $title], new pix_icon('t/print', $title));
             $navbar->printaction = $actionlink;
             $this->page->add_to_page('navigationbar', $this->renderer->navigationbar($navbar));
-
         } else { // Display respondents list.
             $resparr = [];
             for ($i = 0; $i < $total; $i++) {
                 if ($isfullname) {
                     $responsedate = userdate($ridssub[$i]);
-                    $resparr[] = '<a title = "'.$responsedate.'" href="'.$url.'&amp;rid='.
-                        $rids[$i].'&amp;individualresponse=1" >'.$ridsuserfullname[$i].'</a> ';
+                    $resparr[] = '<a title = "' . $responsedate . '" href="' . $url . '&amp;rid=' .
+                            $rids[$i] . '&amp;individualresponse=1" >' . $ridsuserfullname[$i] . '</a> ';
                 } else {
                     $responsedate = '';
-                    $resparr[] = '<a title = "'.$responsedate.'" href="'.$url.'&amp;rid='.
-                        $rids[$i].'&amp;individualresponse=1" >'.
-                        get_string('response', 'kilman').($i + 1).'</a> ';
+                    $resparr[] = '<a title = "' . $responsedate . '" href="' . $url . '&amp;rid=' .
+                            $rids[$i] . '&amp;individualresponse=1" >' .
+                            get_string('response', 'kilman') . ($i + 1) . '</a> ';
                 }
             }
             // Table formatting from http://wikkawiki.org/PageAndCategoryDivisionInACategory.
@@ -2324,7 +2299,7 @@ class kilman {
             $maxlines = 20;
             $maxcols = 3;
             if ($entries >= $maxlines) {
-                $colnumber = min (intval($entries / $maxlines), $maxcols);
+                $colnumber = min(intval($entries / $maxlines), $maxcols);
             } else {
                 $colnumber = 1;
             }
@@ -2338,7 +2313,7 @@ class kilman {
             // Prepare output.
             $respcols = new stdClass();
             for ($i = 0; $i < $colnumber; $i++) {
-                $colname = 'respondentscolumn'.$i;
+                $colname = 'respondentscolumn' . $i;
                 for ($j = 0; $j < $lines; $j++) {
                     $respcols->{$colname}->respondentlink[] = $resparr[$a];
                     $a++;
@@ -2356,7 +2331,7 @@ class kilman {
     }
 
     // Display responses for current user (your responses).
-    public function survey_results_navbar_student($currrid, $userid, $instance, $resps, $reporttype='myreport', $sid='') {
+    public function survey_results_navbar_student($currrid, $userid, $instance, $resps, $reporttype = 'myreport', $sid = '') {
         global $DB;
         $stranonymous = get_string('anonymous', 'kilman');
 
@@ -2374,7 +2349,7 @@ class kilman {
             if ($reporttype == 'report') {
                 if ($this->respondenttype != 'anonymous') {
                     if ($user = $DB->get_record('user', ['id' => $response->userid])) {
-                        $ruser = ' | ' .fullname($user);
+                        $ruser = ' | ' . fullname($user);
                     }
                 } else {
                     $ruser = ' | ' . $stranonymous;
@@ -2390,30 +2365,30 @@ class kilman {
         $nextrid = ($currpos < $total - 1) ? $rids[$currpos + 1] : null;
 
         if ($reporttype == 'myreport') {
-            $url = 'myreport.php?instance='.$instance.'&user='.$userid.'&action=vresp&byresponse=1&individualresponse=1';
+            $url = 'myreport.php?instance=' . $instance . '&user=' . $userid . '&action=vresp&byresponse=1&individualresponse=1';
         } else {
-            $url = 'report.php?instance='.$instance.'&user='.$userid.'&action=vresp&byresponse=1&individualresponse=1&sid='.$sid;
+            $url = 'report.php?instance=' . $instance . '&user=' . $userid . '&action=vresp&byresponse=1&individualresponse=1&sid=' . $sid;
         }
         $navbar = new \stdClass();
         $displaypos = 1;
         if ($prevrid != null) {
-            $title = userdate($ridssub[$currpos - 1].$ridsusers[$currpos - 1]);
-            $navbar->previous = ['url' => ($url.'&rid='.$prevrid), 'title' => $title];
+            $title = userdate($ridssub[$currpos - 1] . $ridsusers[$currpos - 1]);
+            $navbar->previous = ['url' => ($url . '&rid=' . $prevrid), 'title' => $title];
         }
         for ($i = 0; $i < $currpos; $i++) {
-            $title = userdate($ridssub[$i]).$ridsusers[$i];
-            $navbar->prevrespnumbers[] = ['url' => ($url.'&rid='.$rids[$i]), 'title' => $title, 'respnumber' => $displaypos];
+            $title = userdate($ridssub[$i]) . $ridsusers[$i];
+            $navbar->prevrespnumbers[] = ['url' => ($url . '&rid=' . $rids[$i]), 'title' => $title, 'respnumber' => $displaypos];
             $displaypos++;
         }
         $navbar->currrespnumber = $displaypos;
         for (++$i; $i < $total; $i++) {
             $displaypos++;
-            $title = userdate($ridssub[$i]).$ridsusers[$i];
-            $navbar->nextrespnumbers[] = ['url' => ($url.'&rid='.$rids[$i]), 'title' => $title, 'respnumber' => $displaypos];
+            $title = userdate($ridssub[$i]) . $ridsusers[$i];
+            $navbar->nextrespnumbers[] = ['url' => ($url . '&rid=' . $rids[$i]), 'title' => $title, 'respnumber' => $displaypos];
         }
         if ($nextrid != null) {
-            $title = userdate($ridssub[$currpos + 1]).$ridsusers[$currpos + 1];
-            $navbar->next = ['url' => ($url.'&rid='.$nextrid), 'title' => $title];
+            $title = userdate($ridssub[$currpos + 1]) . $ridsusers[$currpos + 1];
+            $navbar->next = ['url' => ($url . '&rid=' . $nextrid), 'title' => $title];
         }
         $this->page->add_to_page('navigationbar', $this->renderer->usernavigationbar($navbar));
         $this->page->add_to_page('bottomnavigationbar', $this->renderer->usernavigationbar($navbar));
@@ -2421,20 +2396,19 @@ class kilman {
 
     /* {{{ proto string survey_results(int surveyid, int precision, bool show_totals, int question_id,
      * array choice_ids, int response_id)
-        Builds HTML for the results for the survey. If a
-        question id and choice id(s) are given, then the results
-        are only calculated for respodants who chose from the
-        choice ids for the given question id.
-        Returns empty string on sucess, else returns an error
-        string. */
+      Builds HTML for the results for the survey. If a
+      question id and choice id(s) are given, then the results
+      are only calculated for respodants who chose from the
+      choice ids for the given question id.
+      Returns empty string on sucess, else returns an error
+      string. */
 
-    public function survey_results($precision = 1, $showtotals = 1, $qid = '', $cids = '', $rid = '',
-                                   $uid=false, $currentgroupid='', $sort='') {
+    public function survey_results($precision = 1, $showtotals = 1, $qid = '', $cids = '', $rid = '', $uid = false, $currentgroupid = '', $sort = '') {
         global $SESSION, $DB;
 
         $SESSION->kilman->noresponses = false;
         if (empty($precision)) {
-            $precision  = 1;
+            $precision = 1;
         }
         if ($showtotals === '') {
             $showtotals = 1;
@@ -2453,8 +2427,7 @@ class kilman {
         $haschoices = array();
         $responsetable = array();
         if (!($types = $DB->get_records('kilman_question_type', array(), 'typeid', 'typeid, has_choices, response_table'))) {
-            $errmsg = sprintf('%s [ %s: question_type ]',
-                get_string('errortable', 'kilman'), 'Table');
+            $errmsg = sprintf('%s [ %s: question_type ]', get_string('errortable', 'kilman'), 'Table');
             return($errmsg);
         }
         foreach ($types as $type) {
@@ -2464,12 +2437,12 @@ class kilman {
 
         // Load survey title (and other globals).
         if (empty($this->survey)) {
-            $errmsg = get_string('erroropening', 'kilman') ." [ ID:{$this->sid} R:";
+            $errmsg = get_string('erroropening', 'kilman') . " [ ID:{$this->sid} R:";
             return($errmsg);
         }
 
         if (empty($this->questions)) {
-            $errmsg = get_string('erroropening', 'kilman') .' '. 'No questions found.';
+            $errmsg = get_string('erroropening', 'kilman') . ' ' . 'No questions found.';
             return($errmsg);
         }
 
@@ -2493,17 +2466,14 @@ class kilman {
                 $rows = $this->get_responses(false, $currentgroupid);
             }
             if (!$rows) {
-                $this->page->add_to_page('respondentinfo',
-                    $this->renderer->notification(get_string('noresponses', 'kilman'),
-                        \core\output\notification::NOTIFY_ERROR));
+                $this->page->add_to_page('respondentinfo', $this->renderer->notification(get_string('noresponses', 'kilman'), \core\output\notification::NOTIFY_ERROR));
                 $SESSION->kilman->noresponses = true;
                 return;
             }
             $numresps = count($rows);
-            $this->page->add_to_page('respondentinfo',
-                ' '.get_string('responses', 'kilman').': <strong>'.$numresps.'</strong>');
+            $this->page->add_to_page('respondentinfo', ' ' . get_string('responses', 'kilman') . ': <strong>' . $numresps . '</strong>');
             if (empty($rows)) {
-                $errmsg = get_string('erroropening', 'kilman') .' '. get_string('noresponsedata', 'kilman');
+                $errmsg = get_string('erroropening', 'kilman') . ' ' . get_string('noresponsedata', 'kilman');
                 return($errmsg);
             }
 
@@ -2523,8 +2493,7 @@ class kilman {
             $this->page->add_to_page('subtitle', clean_text($this->survey->subtitle));
         }
         if ($this->survey->info) {
-            $infotext = file_rewrite_pluginfile_urls($this->survey->info, 'pluginfile.php',
-                $this->context->id, 'mod_kilman', 'info', $this->survey->id);
+            $infotext = file_rewrite_pluginfile_urls($this->survey->info, 'pluginfile.php', $this->context->id, 'mod_kilman', 'info', $this->survey->id);
             $this->page->add_to_page('addinfo', format_text($infotext, FORMAT_HTML, ['noclean' => true]));
         }
 
@@ -2550,10 +2519,7 @@ class kilman {
             if ($question->content == '<p>  </p>') {
                 $question->content = '';
             }
-            $this->page->add_to_page('responses',
-                $this->renderer->container(format_text(file_rewrite_pluginfile_urls($question->content, 'pluginfile.php',
-                    $question->context->id, 'mod_kilman', 'question', $question->id),
-                    FORMAT_HTML, ['noclean' => true]), 'qn-question'));
+            $this->page->add_to_page('responses', $this->renderer->container(format_text(file_rewrite_pluginfile_urls($question->content, 'pluginfile.php', $question->context->id, 'mod_kilman', 'question', $question->id), FORMAT_HTML, ['noclean' => true]), 'qn-question'));
             $this->page->add_to_page('responses', $this->renderer->results_output($question, $rids, $sort, $anonymous));
             $this->page->add_to_page('responses', $this->renderer->container_end()); // End qn-content.
             $this->page->add_to_page('responses', $this->renderer->container_end()); // End qn-container.
@@ -2684,12 +2650,7 @@ class kilman {
      * @throws dml_missing_record_exception
      * @throws dml_multiple_records_exception
      */
-    protected function process_csv_row(array &$row,
-                                       stdClass $resprow,
-                                       $currentgroupid,
-                                       array &$questionsbyposition,
-                                       $nbinfocols,
-                                       $numrespcols, $showincompletes = 0) {
+    protected function process_csv_row(array &$row, stdClass $resprow, $currentgroupid, array &$questionsbyposition, $nbinfocols, $numrespcols, $showincompletes = 0) {
         global $DB;
 
         static $config = null;
@@ -2720,10 +2681,10 @@ class kilman {
         } else {
             // For a public kilman, look for the course that used it.
             $sql = 'SELECT q.id, q.course, c.fullname ' .
-                   'FROM {kilman_response} qr ' .
-                   'INNER JOIN {kilman} q ON qr.kilmanid = q.id ' .
-                   'INNER JOIN {course} c ON q.course = c.id ' .
-                   'WHERE qr.id = ? AND qr.complete = ? ';
+                    'FROM {kilman_response} qr ' .
+                    'INNER JOIN {kilman} q ON qr.kilmanid = q.id ' .
+                    'INNER JOIN {course} c ON q.course = c.id ' .
+                    'WHERE qr.id = ? AND qr.complete = ? ';
             if ($record = $DB->get_record_sql($sql, [$resprow->rid, 'y'])) {
                 $courseid = $record->course;
                 $coursename = $record->fullname;
@@ -2744,11 +2705,11 @@ class kilman {
                 if ($user->id) {
                     if ($groups = groups_get_all_groups($courseid, $user->id)) {
                         foreach ($groups as $group) {
-                            $groupname .= $group->name.', ';
+                            $groupname .= $group->name . ', ';
                         }
                         $groupname = substr($groupname, 0, strlen($groupname) - 2);
                     } else {
-                        $groupname = ' ('.get_string('groupnonmembers').')';
+                        $groupname = ' (' . get_string('groupnonmembers') . ')';
                     }
                 }
             }
@@ -2819,9 +2780,10 @@ class kilman {
     }
 
     /* {{{ proto array survey_generate_csv(int surveyid)
-    Exports the results of a survey to an array.
-    */
-    public function generate_csv($rid='', $userid='', $choicecodes=1, $choicetext=0, $currentgroupid, $showincompletes = 0) {
+      Exports the results of a survey to an array.
+     */
+
+    public function generate_csv($rid = '', $userid = '', $choicecodes = 1, $choicetext = 0, $currentgroupid, $showincompletes = 0) {
         global $DB;
 
         raise_memory_limit('1G');
@@ -2848,21 +2810,21 @@ class kilman {
         $nbinfocols = count($columns);
 
         $idtocsvmap = array(
-            '0',    // 0: unused
-            '0',    // 1: bool -> boolean
-            '1',    // 2: text -> string
-            '1',    // 3: essay -> string
-            '0',    // 4: radio -> string
-            '0',    // 5: check -> string
-            '0',    // 6: dropdn -> string
-            '0',    // 7: rating -> number
-            '0',    // 8: rate -> number
-            '1',    // 9: date -> string
+            '0', // 0: unused
+            '0', // 1: bool -> boolean
+            '1', // 2: text -> string
+            '1', // 3: essay -> string
+            '0', // 4: radio -> string
+            '0', // 5: check -> string
+            '0', // 6: dropdn -> string
+            '0', // 7: rating -> number
+            '0', // 8: rate -> number
+            '1', // 9: date -> string
             '0'     // 10: numeric -> number.
         );
 
         if (!$survey = $DB->get_record('kilman_survey', array('id' => $this->survey->id))) {
-            print_error ('surveynotexists', 'kilman');
+            print_error('surveynotexists', 'kilman');
         }
 
         // Get all responses for this survey in one go.
@@ -2913,7 +2875,7 @@ class kilman {
             if (in_array($type, $choicetypes)) {
                 /* single or multiple or rate */
                 if (!isset($choicesbyqid[$qid])) {
-                    throw new coding_exception('Choice question has no choices!', 'question id '.$qid.' of type '.$type);
+                    throw new coding_exception('Choice question has no choices!', 'question id ' . $qid . ' of type ' . $type);
                 }
                 $choices = $choicesbyqid[$qid];
 
@@ -2929,7 +2891,7 @@ class kilman {
                             $content = $choice->content;
                             // If "Other" add a column for the actual "other" text entered.
                             if (preg_match('/^!other/', $content)) {
-                                $col = $choice->name.'_'.$stringother;
+                                $col = $choice->name . '_' . $stringother;
                                 $columns[][$qpos] = $col;
                                 $questionidcols[][$qpos] = null;
                                 array_push($types, '0');
@@ -2950,15 +2912,15 @@ class kilman {
                             } else {
                                 $modality = strip_tags($contents->text);
                             }
-                            $col = $choice->name.'->'.$modality;
+                            $col = $choice->name . '->' . $modality;
                             $columns[][$qpos] = $col;
-                            $questionidcols[][$qpos] = $qid.'_'.$choice->cid;
+                            $questionidcols[][$qpos] = $qid . '_' . $choice->cid;
                             array_push($types, '0');
                             // If "Other" add a column for the "other" checkbox.
                             // Then add a column for the actual "other" text entered.
                             if (preg_match('/^!other/', $content)) {
                                 $content = $stringother;
-                                $col = $choice->name.'->['.$content.']';
+                                $col = $choice->name . '->[' . $content . ']';
                                 $columns[][$qpos] = $col;
                                 $questionidcols[][$qpos] = null;
                                 array_push($types, '0');
@@ -2988,7 +2950,7 @@ class kilman {
                                     if ($contents->title) {
                                         $contentright = $contents->title;
                                     }
-                                    $modality = strip_tags($contentleft.'|'.$contentright);
+                                    $modality = strip_tags($contentleft . '|' . $contentright);
                                     $modality = preg_replace("/[\r\n\t]/", ' ', $modality);
                                 } else {
                                     $contents = kilman_choice_values($content);
@@ -3001,9 +2963,9 @@ class kilman {
                                         $modality = preg_replace("/[\r\n\t]/", ' ', $modality);
                                     }
                                 }
-                                $col = $choice->name.'->'.$modality;
+                                $col = $choice->name . '->' . $modality;
                                 $columns[][$qpos] = $col;
-                                $questionidcols[][$qpos] = $qid.'_'.$choice->cid;
+                                $questionidcols[][$qpos] = $qid . '_' . $choice->cid;
                                 array_push($types, $idtocsvmap[$type]);
                             }
                         }
@@ -3019,7 +2981,6 @@ class kilman {
 
         array_push($output, $columns);
         $numrespcols = count($output[0]); // Number of columns used for storing question responses.
-
         // Flatten questionidcols.
         $tmparr = [];
         for ($c = 0; $c < $nbinfocols; $c++) {
@@ -3045,7 +3006,7 @@ class kilman {
             }
             $questionpositions[$qid] = $p;
             if (strpos($qid, '_') !== false) {
-                $tmparr = explode ('_', $qid);
+                $tmparr = explode('_', $qid);
                 $questionid = $tmparr[0];
             } else {
                 $questionid = $qid;
@@ -3056,7 +3017,6 @@ class kilman {
 
         $formatoptions = new stdClass();
         $formatoptions->filter = false;  // To prevent any filtering in CSV output.
-
         // Get textual versions of responses, add them to output at the correct col position.
         $prevresprow = false; // Previous response row.
         $row = [];
@@ -3074,13 +3034,12 @@ class kilman {
             $questionobj = $this->questions[$qid];
 
             if ($prevresprow !== false && $prevresprow->rid !== $rid) {
-                $output[] = $this->process_csv_row($row, $prevresprow, $currentgroupid, $questionsbyposition,
-                    $nbinfocols, $numrespcols, $showincompletes);
+                $output[] = $this->process_csv_row($row, $prevresprow, $currentgroupid, $questionsbyposition, $nbinfocols, $numrespcols, $showincompletes);
                 $row = [];
             }
 
             if ($qtype === QUESRATE || $qtype === QUESCHECK) {
-                $key = $qid.'_'.$responserow->choice_id;
+                $key = $qid . '_' . $responserow->choice_id;
                 $position = $questionpositions[$key];
                 if ($qtype === QUESRATE) {
                     $choicetxt = $responserow->rankvalue + 1;
@@ -3117,11 +3076,10 @@ class kilman {
                     $content = $choicesbyqid[$qid][$responserow->choice_id]->content;
                     if (preg_match('/^!other/', $content)) {
                         // If this has an "other" text, use it.
-                        $responsetxt = preg_replace(["/^!other=/", "/^!other/"],
-                            ['', get_string('other', 'kilman')], $content);
+                        $responsetxt = preg_replace(["/^!other=/", "/^!other/"], ['', get_string('other', 'kilman')], $content);
                         $responsetxt1 = $responserow->response;
                     } else if (($choicecodes == 1) && ($choicetext == 1)) {
-                        $responsetxt = $c.' : '.$content;
+                        $responsetxt = $c . ' : ' . $content;
                     } else if ($choicecodes == 1) {
                         $responsetxt = $c;
                     } else {
@@ -3153,8 +3111,7 @@ class kilman {
 
         if ($prevresprow !== false) {
             // Add final row to output. May not exist if no response data was ever present.
-            $output[] = $this->process_csv_row($row, $prevresprow, $currentgroupid, $questionsbyposition,
-                $nbinfocols, $numrespcols, $showincompletes);
+            $output[] = $this->process_csv_row($row, $prevresprow, $currentgroupid, $questionsbyposition, $nbinfocols, $numrespcols, $showincompletes);
         }
 
         // Change table headers to incorporate actual question numbers.
@@ -3170,8 +3127,7 @@ class kilman {
                 $thisoutput = str_replace('->.', '', $thisoutput);
             }
             // If variable is not named no separator needed between Question number and potential sub-variables.
-            if ($thisoutput == '' || strstr($thisoutput, '->.') || substr($thisoutput, 0, 2) == '->'
-                || substr($thisoutput, 0, 1) == '_') {
+            if ($thisoutput == '' || strstr($thisoutput, '->.') || substr($thisoutput, 0, 2) == '->' || substr($thisoutput, 0, 1) == '_') {
                 $sep = '';
             } else {
                 $sep = '_';
@@ -3185,7 +3141,7 @@ class kilman {
             if ($pos) {
                 $thisoutput = substr($thisoutput, 0, $pos);
             }
-            $out = 'Q'.sprintf("%02d", $numquestion).$sep.$thisoutput;
+            $out = 'Q' . sprintf("%02d", $numquestion) . $sep . $thisoutput;
             $output[0][$i] = $out;
         }
         return $output;
@@ -3199,7 +3155,6 @@ class kilman {
      * @param int $movetopos The position to move question to.
      *
      */
-
     public function move_question($moveqid, $movetopos) {
         global $DB;
 
@@ -3226,11 +3181,10 @@ class kilman {
         return false;
     }
 
-    public function response_analysis($rid, $resps, $compare, $isgroupmember, $allresponses, $currentgroupid,
-                                      $filteredsections = null) {
+    public function response_analysis($rid, $resps, $compare, $isgroupmember, $allresponses, $currentgroupid, $filteredsections = null) {
         global $DB, $CFG;
-        require_once($CFG->libdir.'/tablelib.php');
-        require_once($CFG->dirroot.'/mod/kilman/drawchart.php');
+        require_once($CFG->libdir . '/tablelib.php');
+        require_once($CFG->dirroot . '/mod/kilman/drawchart.php');
 
         // Find if there are any feedbacks in this kilman.
         $sql = "SELECT * FROM {kilman_fb_sections} WHERE surveyid = ? AND section IS NOT NULL";
@@ -3239,7 +3193,7 @@ class kilman {
         }
         $action = optional_param('action', 'vall', PARAM_ALPHA);
 
-        if ($resp = $DB->get_record('kilman_response', ['id' => $rid]) ) {
+        if ($resp = $DB->get_record('kilman_response', ['id' => $rid])) {
             $userid = $resp->userid;
             if ($user = $DB->get_record('user', ['id' => $userid])) {
                 $ruser = fullname($user);
@@ -3259,7 +3213,7 @@ class kilman {
         if ($this->survey->feedbackscores) {
             $table = new html_table();
             $table->size = [null, null];
-            
+
             $table->head = [];
             $table->wrap = [];
             if ($compare) {
@@ -3295,7 +3249,7 @@ class kilman {
                 $responsescores[$qid] = $question->get_feedback_scores($rids);
             }
         }
-        
+
         // Just in case no values have been entered in the various questions possible answers field.
         if ($maxtotalscore === 0) {
             return '';
@@ -3309,13 +3263,13 @@ class kilman {
         if (!$allresponses && $groupmode != 0) {
             $nbparticipants = max(1, $nbparticipants - !$isgroupmember);
         }
-        
-        
-                    
+
+
+
         foreach ($responsescores as $qid => $responsescore) {
             if (!empty($responsescore)) {
                 foreach ($responsescore as $rrid => $response) {
-                    
+
                     // If this is current user's response OR if current user is viewing another group's results.
                     if ($rrid == $rid || $allresponses) {
                         if (!isset($qscore[$qid])) {
@@ -3326,7 +3280,6 @@ class kilman {
                     // Course score.
                     if (!isset($allqscore[$qid])) {
                         $allqscore[$qid] = 0;
-                        
                     }
                     // Only add current score if conditions below are met.
                     if ($groupmode == 0 || $isgroupmember || (!$isgroupmember && $rrid != $rid) || $allresponses) {
@@ -3335,7 +3288,7 @@ class kilman {
                 }
             }
         }
-        
+
         $totalscore = array_sum($qscore);
         $scorepercent = round($totalscore / $maxtotalscore * 100);
         $oppositescorepercent = 100 - $scorepercent;
@@ -3355,8 +3308,7 @@ class kilman {
                     $labels[] = $feedback->feedbacklabel;
                 }
             }
-            $feedback = $DB->get_record_select('kilman_feedback',
-                'sectionid = ? AND minscore <= ? AND ? < maxscore', [$sectionid, $scorepercent, $scorepercent]);
+            $feedback = $DB->get_record_select('kilman_feedback', 'sectionid = ? AND minscore <= ? AND ? < maxscore', [$sectionid, $scorepercent, $scorepercent]);
 
             // To eliminate all potential % chars in heading text (might interfere with the sprintf function).
             $sectionheading = str_replace('%', '', $sectionheading);
@@ -3364,9 +3316,8 @@ class kilman {
             $original = array('$scorepercent', '$oppositescorepercent');
             $result = array('%s%%', '%s%%');
             $sectionheading = str_replace($original, $result, $sectionheading);
-            $sectionheading = sprintf($sectionheading , $scorepercent, $oppositescorepercent);
-            $sectionheading = file_rewrite_pluginfile_urls($sectionheading, 'pluginfile.php',
-                $this->context->id, 'mod_kilman', 'sectionheading', $sectionid);
+            $sectionheading = sprintf($sectionheading, $scorepercent, $oppositescorepercent);
+            $sectionheading = file_rewrite_pluginfile_urls($sectionheading, 'pluginfile.php', $this->context->id, 'mod_kilman', 'sectionheading', $sectionid);
             $feedbackmessages[] = $this->renderer->box_start();
             $feedbackmessages[] = format_text($sectionheading, FORMAT_HTML, ['noclean' => true]);
             $feedbackmessages[] = $this->renderer->box_end();
@@ -3375,8 +3326,7 @@ class kilman {
                 // Clean the text, ready for display.
                 $formatoptions = new stdClass();
                 $formatoptions->noclean = true;
-                $feedbacktext = file_rewrite_pluginfile_urls($feedback->feedbacktext, 'pluginfile.php',
-                    $this->context->id, 'mod_kilman', 'feedback', $feedback->id);
+                $feedbacktext = file_rewrite_pluginfile_urls($feedback->feedbacktext, 'pluginfile.php', $this->context->id, 'mod_kilman', 'feedback', $feedback->id);
                 $feedbacktext = format_text($feedbacktext, $feedback->feedbacktextformat, $formatoptions);
                 $feedbackmessages[] = $this->renderer->box_start();
                 $feedbackmessages[] = $feedbacktext;
@@ -3384,14 +3334,12 @@ class kilman {
             }
             $score = array($scorepercent, 100 - $scorepercent);
             $allscore = null;
-            if ($compare  || $allresponses) {
+            if ($compare || $allresponses) {
                 $allscore = array($allscorepercent, 100 - $allscorepercent);
             }
             $usergraph = get_config('kilman', 'usergraph');
             if ($usergraph && $this->survey->chart_type) {
-                $this->page->add_to_page('feedbackcharts',
-                    draw_chart ($feedbacktype = 'global', $this->survey->chart_type, $labels,
-                        $score, $allscore, $sectionlabel, $groupname, $allresponses));
+                $this->page->add_to_page('feedbackcharts', draw_chart($feedbacktype = 'global', $this->survey->chart_type, $labels, $score, $allscore, $sectionlabel, $groupname, $allresponses));
             }
             // Display class or group score. Pending chart library decision to display?
             // Find out if this feedback sectionlabel has a pipe separator.
@@ -3399,9 +3347,9 @@ class kilman {
             $oppositescore = '';
             $oppositeallscore = '';
             if (count($lb) > 1) {
-                $sectionlabel = $lb[0].' | '.$lb[1];
-                $oppositescore = ' | '.$score[1].'%';
-                $oppositeallscore = ' | '.$allscore[1].'%';
+                $sectionlabel = $lb[0] . ' | ' . $lb[1];
+                $oppositescore = ' | ' . $score[1] . '%';
+                $oppositeallscore = ' | ' . $allscore[1] . '%';
             }
             if ($this->survey->feedbackscores) {
                 if ($compare) {
@@ -3415,7 +3363,7 @@ class kilman {
                     ksort($contar);
                     $table->data[] = $contar;
                 } else {
-                    $table->data[] = array($sectionlabel, $allscore[0].'%'.$oppositeallscore);
+                    $table->data[] = array($sectionlabel, $allscore[0] . '%' . $oppositeallscore);
                 }
 
                 $this->page->add_to_page('feedbackscores', html_writer::table($table));
@@ -3425,7 +3373,6 @@ class kilman {
         }
 
         // Now process scores for more than one section.
-
         // Initialize scores and maxscores to 0.
         $score = array();
         $allscore = array();
@@ -3469,7 +3416,7 @@ class kilman {
                     $key = ($key == 0) ? 1 : $key;
                     $score[$section] += round($qscore[$qid] * $key);
                     $maxscore[$section] += round($qmax[$qid] * $key);
-                    if ($compare  || $allresponses) {
+                    if ($compare || $allresponses) {
                         $allscore[$section] += round($allqscore[$qid] * $key);
                     }
                 }
@@ -3484,7 +3431,7 @@ class kilman {
 
             if (($compare || $allresponses) && $nbparticipants != 0) {
                 $allscorepercent[$section] = ($maxscore[$section] > 0) ? (round(($allscore[$section] / $nbparticipants) /
-                    $maxscore[$section] * 100)) : 0;
+                                $maxscore[$section] * 100)) : 0;
                 $alloppositescorepercent[$section] = 100 - $allscorepercent[$section];
             }
 
@@ -3505,22 +3452,17 @@ class kilman {
                 $sectionheading = str_replace($original, $result, $sectionheading);
                 $formatoptions = new stdClass();
                 $formatoptions->noclean = true;
-                $sectionheading = file_rewrite_pluginfile_urls($sectionheading, 'pluginfile.php',
-                    $this->context->id, 'mod_kilman', 'sectionheading', $imageid);
+                $sectionheading = file_rewrite_pluginfile_urls($sectionheading, 'pluginfile.php', $this->context->id, 'mod_kilman', 'sectionheading', $imageid);
                 $sectionheading = format_text($sectionheading, 1, $formatoptions);
                 $feedbackmessages[] = $this->renderer->box_start('reportQuestionTitle');
                 $feedbackmessages[] = format_text($sectionheading, FORMAT_HTML, $formatoptions);
-                $feedback = $DB->get_record_select('kilman_feedback',
-                    'sectionid = ? AND minscore <= ? AND ? < maxscore',
-                    array($feedbacksectionid, $scorepercent[$section], $scorepercent[$section]),
-                    'id,feedbacktext,feedbacktextformat');
+                $feedback = $DB->get_record_select('kilman_feedback', 'sectionid = ? AND minscore <= ? AND ? < maxscore', array($feedbacksectionid, $scorepercent[$section], $scorepercent[$section]), 'id,feedbacktext,feedbacktextformat');
                 $feedbackmessages[] = $this->renderer->box_end();
                 if (!empty($feedback->feedbacktext)) {
                     // Clean the text, ready for display.
                     $formatoptions = new stdClass();
                     $formatoptions->noclean = true;
-                    $feedbacktext = file_rewrite_pluginfile_urls($feedback->feedbacktext, 'pluginfile.php',
-                        $this->context->id, 'mod_kilman', 'feedback', $feedback->id);
+                    $feedbacktext = file_rewrite_pluginfile_urls($feedback->feedbacktext, 'pluginfile.php', $this->context->id, 'mod_kilman', 'feedback', $feedback->id);
                     $feedbacktext = format_text($feedbacktext, $feedback->feedbacktextformat, $formatoptions);
                     $feedbackmessages[] = $this->renderer->box_start('feedbacktext');
                     $feedbackmessages[] = $feedbacktext;
@@ -3571,9 +3513,7 @@ class kilman {
         }
 
         if ($usergraph && $this->survey->chart_type) {
-            $this->page->add_to_page('feedbackcharts',
-                draw_chart($feedbacktype = 'sections', $this->survey->chart_type, array_values($chartlabels),
-                    array_values($scorepercent), array_values($allscorepercent), $sectionlabel, $groupname, $allresponses));
+            $this->page->add_to_page('feedbackcharts', draw_chart($feedbacktype = 'sections', $this->survey->chart_type, array_values($chartlabels), array_values($scorepercent), array_values($allscorepercent), $sectionlabel, $groupname, $allresponses));
         }
         if ($this->survey->feedbackscores) {
             $this->page->add_to_page('feedbackscores', html_writer::table($table));
@@ -3582,4 +3522,200 @@ class kilman {
         return $feedbackmessages;
     }
 
+    public function response_analysispdf($rid, $resps, $compare, $isgroupmember, $allresponses, $currentgroupid, $filteredsections = null) {
+        global $DB, $CFG;
+        require_once($CFG->libdir . '/tablelib.php');
+        require_once($CFG->dirroot . '/mod/kilman/drawchart.php');
+        
+        $table = array();
+        
+        // Find if there are any feedbacks in this kilman.
+        $sql = "SELECT * FROM {kilman_fb_sections} WHERE surveyid = ? AND section IS NOT NULL";
+        if (!$fbsections = $DB->get_records_sql($sql, [$this->survey->id])) {
+            return '';
+        }
+        
+        $action = optional_param('action', 'vall', PARAM_ALPHA);
+
+        if ($resp = $DB->get_record('kilman_response', ['id' => $rid])) {
+            $userid = $resp->userid;
+            if ($user = $DB->get_record('user', ['id' => $userid])) {
+                $ruser = fullname($user);
+            }
+            $contar = array("0" => $ruser, "1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0);
+        }
+        
+        // Available group modes (0 = no groups; 1 = separate groups; 2 = visible groups).
+        $groupmode = groups_get_activity_groupmode($this->cm, $this->course);
+        $groupname = get_string('allparticipants');
+        if ($groupmode > 0) {
+            if ($currentgroupid > 0) {
+                $groupname = groups_get_group_name($currentgroupid);
+            } else {
+                $groupname = get_string('allparticipants');
+            }
+        }
+        if ($this->survey->feedbackscores) {
+            
+
+            if ($compare) {
+                $table["head"] = array(
+                                    "user" => "Usuario", 
+                                    "acomodativo" => "Acomodativo", 
+                                    "evasivo" => "Evasivo", 
+                                    "transador" => "Transador", 
+                                    "colaborativo" => "Colaborativo", 
+                                    "competitivo" => "Competitivo"
+                                    );
+            }
+        }
+
+        $fbsectionsnb = array_keys($fbsections);
+        $numsections = count($fbsections);
+
+        // Get all response ids for all respondents.
+        $rids = array();
+        foreach ($resps as $key => $resp) {
+            $rids[] = $key;
+        }
+        $nbparticipants = count($rids);
+        $responsescores = [];
+
+        // Calculate max score per question in kilman.
+        $qmax = [];
+        $maxtotalscore = 0;
+        foreach ($this->questions as $question) {
+            $qid = $question->id;
+            if ($question->valid_feedback()) {
+                $qmax[$qid] = $question->get_feedback_maxscore();
+                $maxtotalscore += $qmax[$qid];
+                // Get all the feedback scores for this question.
+                $responsescores[$qid] = $question->get_feedback_scores($rids);
+            }
+        }
+
+        // Just in case no values have been entered in the various questions possible answers field.
+        if ($maxtotalscore === 0) {
+            return '';
+        }
+        $feedbackmessages = [];
+
+        // Get individual scores for each question in this responses set.
+        $qscore = [];
+        $allqscore = [];
+
+        if (!$allresponses && $groupmode != 0) {
+            $nbparticipants = max(1, $nbparticipants - !$isgroupmember);
+        }
+
+
+
+        foreach ($responsescores as $qid => $responsescore) {
+            if (!empty($responsescore)) {
+                foreach ($responsescore as $rrid => $response) {
+
+                    // If this is current user's response OR if current user is viewing another group's results.
+                    if ($rrid == $rid || $allresponses) {
+                        if (!isset($qscore[$qid])) {
+                            $qscore[$qid] = 0;
+                        }
+                        $qscore[$qid] = $response->score;
+                    }
+                    // Course score.
+                    if (!isset($allqscore[$qid])) {
+                        $allqscore[$qid] = 0;
+                    }
+                    // Only add current score if conditions below are met.
+                    if ($groupmode == 0 || $isgroupmember || (!$isgroupmember && $rrid != $rid) || $allresponses) {
+                        $allqscore[$qid] += $response->score;
+                    }
+                }
+            }
+        }
+
+        
+        $totalscore = array_sum($qscore);
+        $scorepercent = round($totalscore / $maxtotalscore * 100);
+        $oppositescorepercent = 100 - $scorepercent;
+        $alltotalscore = array_sum($allqscore);
+        $allscorepercent = round($alltotalscore / $nbparticipants / $maxtotalscore * 100);
+
+        // No need to go further if feedback is global, i.e. only relying on total score.
+        if ($this->survey->feedbacksections == 1) {
+            $sectionid = $fbsectionsnb[0];
+            $sectionlabel = $fbsections[$sectionid]->sectionlabel;
+
+            $sectionheading = $fbsections[$sectionid]->sectionheading;
+            $feedbacks = $DB->get_records('kilman_feedback', ['sectionid' => $sectionid]);
+            $labels = array();
+            foreach ($feedbacks as $feedback) {
+                if ($feedback->feedbacklabel != '') {
+                    $labels[] = $feedback->feedbacklabel;
+                }
+            }
+            $feedback = $DB->get_record_select('kilman_feedback', 'sectionid = ? AND minscore <= ? AND ? < maxscore', [$sectionid, $scorepercent, $scorepercent]);
+
+            // To eliminate all potential % chars in heading text (might interfere with the sprintf function).
+            $sectionheading = str_replace('%', '', $sectionheading);
+            // Replace section heading placeholders with their actual value (if any).
+            $original = array('$scorepercent', '$oppositescorepercent');
+            $result = array('%s%%', '%s%%');
+            $sectionheading = str_replace($original, $result, $sectionheading);
+            $sectionheading = sprintf($sectionheading, $scorepercent, $oppositescorepercent);
+            $sectionheading = file_rewrite_pluginfile_urls($sectionheading, 'pluginfile.php', $this->context->id, 'mod_kilman', 'sectionheading', $sectionid);
+            $feedbackmessages[] = $this->renderer->box_start();
+            $feedbackmessages[] = format_text($sectionheading, FORMAT_HTML, ['noclean' => true]);
+            $feedbackmessages[] = $this->renderer->box_end();
+
+            if (!empty($feedback->feedbacktext)) {
+                // Clean the text, ready for display.
+                $formatoptions = new stdClass();
+                $formatoptions->noclean = true;
+                $feedbacktext = file_rewrite_pluginfile_urls($feedback->feedbacktext, 'pluginfile.php', $this->context->id, 'mod_kilman', 'feedback', $feedback->id);
+                $feedbacktext = format_text($feedbacktext, $feedback->feedbacktextformat, $formatoptions);
+                $feedbackmessages[] = $this->renderer->box_start();
+                $feedbackmessages[] = $feedbacktext;
+                $feedbackmessages[] = $this->renderer->box_end();
+            }
+            
+            $score = array($scorepercent, 100 - $scorepercent);
+            $allscore = null;
+            if ($compare || $allresponses) {
+                $allscore = array($allscorepercent, 100 - $allscorepercent);
+            }
+            $usergraph = get_config('kilman', 'usergraph');
+            if ($usergraph && $this->survey->chart_type) {
+                $this->page->add_to_page('feedbackcharts', draw_chart($feedbacktype = 'global', $this->survey->chart_type, $labels, $score, $allscore, $sectionlabel, $groupname, $allresponses));
+            }
+            // Display class or group score. Pending chart library decision to display?
+            // Find out if this feedback sectionlabel has a pipe separator.
+            $lb = explode("|", $sectionlabel);
+            $oppositescore = '';
+            $oppositeallscore = '';
+            if (count($lb) > 1) {
+                $sectionlabel = $lb[0] . ' | ' . $lb[1];
+                $oppositescore = ' | ' . $score[1] . '%';
+                $oppositeallscore = ' | ' . $allscore[1] . '%';
+            }
+            if ($this->survey->feedbackscores) {
+                if ($compare) {
+                    foreach ($qscore as $responsecategories) {
+                        if (isset($contar[$responsecategories])) {
+                            $contar[$responsecategories]+=1;
+                        } else {
+                            $contar[$responsecategories] = 1;
+                        }
+                    }
+                    ksort($contar);
+                    $table["data"] = $contar;
+                }
+
+                
+            }
+
+            return $table;
+        }
+
+        return $table;
+    }
 }

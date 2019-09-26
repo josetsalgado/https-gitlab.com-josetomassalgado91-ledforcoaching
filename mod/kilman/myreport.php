@@ -231,7 +231,7 @@ switch ($action) {
         } else {
             $titletext = get_string('yourresponse', 'kilman');
             $titletext .= "<br><a href='util/Interpretacion_Resultados_Test.pdf' target='_blank' style='font-size: 14px;'>Descargar Interpretación</a>";
-            $titletext .= "<br><a href='util/responses.php' target='_blank' style='font-size: 14px;'>Descargar Respuestas</a>";
+            $titletext .= "<br><a href='util/responses.php?instance=" . $instance . "&user=" . $userid . "&byresponse=" . $byresponse . "&currentgroupid=" . $currentgroupid . "&rid=" .$rid . "' target='_blank' style='font-size: 14px;'>Descargar Respuestas</a>";
         }
 
         $compare = false;

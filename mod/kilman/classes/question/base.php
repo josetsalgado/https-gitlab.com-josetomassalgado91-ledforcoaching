@@ -795,6 +795,19 @@ abstract class base {
     }
 
     /**
+     * Get the output for question renderers / templates.
+     * @param object $formdata
+     * @param string $descendantdata
+     * @param integer $qnum
+     * @param boolean $blankkilman
+     */
+    public function response_outputpdf($data, $qnum='') {
+        $pagetags = $this->questionstart_survey_display($qnum, $data);
+        $pagetags->qformelement = $this->response_survey_display($data);
+        return $pagetags;
+    }
+    
+    /**
      * Get the output for the start of the questions in a survey.
      * @param integer $qnum
      * @param object $formdata
