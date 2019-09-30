@@ -73,6 +73,58 @@ class sectiontext extends base {
     }
 
     protected function question_survey_display($data, $descendantsdata, $blankkilman=false) {
+//        global $DB, $CFG, $PAGE;
+//        require_once($CFG->dirroot.'/mod/kilman/kilman.class.php');
+//
+//        // If !isset then normal behavior as sectiontext question.
+//        if (!isset($data->kilman_id)) {
+//            return '';
+//        }
+//
+//        $fbsections = $DB->get_records('kilman_fb_sections', ['surveyid' => $this->surveyid]);
+//        $filteredsections = [];
+//
+//        // In which section(s) is this question?
+//        foreach ($fbsections as $key => $fbsection) {
+//            $scorecalculation = unserialize($fbsection->scorecalculation);
+//            if (array_key_exists($this->id, $scorecalculation)) {
+//                array_push($filteredsections, $fbsection->section);
+//            }
+//        }
+//
+//        // If empty then normal behavior as sectiontext question.
+//        if (empty($filteredsections)) {
+//            return '';
+//        }
+//
+//        list($cm, $course, $kilman) = kilman_get_standard_page_items(null, $data->kilman_id);
+//        $kilman = new \kilman(0, $kilman, $course, $cm);
+//        $kilman->add_renderer($PAGE->get_renderer('mod_kilman'));
+//        $kilman->add_page(new \mod_kilman\output\reportpage());
+//
+//        $compare = false;
+//        $allresponses = false;
+//        $currentgroupid = 0;
+//        $isgroupmember = false;
+//        $resps = [$data->rid => null];
+//        $rid = $data->rid;
+//        // For $filteredsections -> get the feedback messages only for this sections!
+//        $feedbackmessages = $kilman->response_analysis($rid, $resps, $compare, $isgroupmember, $allresponses,
+//            $currentgroupid, $filteredsections);
+//
+//        // Output.
+//        $questiontags = new \stdClass();
+//        $questiontags->qelements = new \stdClass();
+//        $choice = new \stdClass();
+//
+//        $choice->fb = implode($feedbackmessages);
+//
+//        $questiontags->qelements->choice = $choice;
+//        return $questiontags;
+
+    }
+
+    protected function question_surveypdf_display($data, $descendantsdata, $blankkilman=false) {
         global $DB, $CFG, $PAGE;
         require_once($CFG->dirroot.'/mod/kilman/kilman.class.php');
 
@@ -123,11 +175,15 @@ class sectiontext extends base {
         return $questiontags;
 
     }
-
+    
+    
     protected function response_survey_display($data) {
         return '';
     }
 
+    protected function response_surveypdf_display($data) {
+        return '';
+    }
     /**
      * Check question's form data for complete response.
      *

@@ -239,9 +239,8 @@ class renderer extends \plugin_renderer_base {
         // If the response has a template, then render it from the 'qformelement' context. If no template, then 'qformelement'
         // already contains HTML.
         if (($template = $question->response_template())) {
-            $pagetags->qformelement = $this->render_from_template($template, $pagetags->qformelement);
+            $pagetags->qformelement = $this->render_from_template('mod_kilman/response_radiopdf', $pagetags->qformelement);
         }
-
         // Calling "question_output" may generate per question notifications. If present, add them to the question output.
         if (($notifications = $question->get_notifications()) !== false) {
             foreach ($notifications as $notification) {

@@ -117,6 +117,10 @@ $data = [
     "responsesuser" => $responsesuser
 ];
 $htmlbody = $OUTPUT->render_from_template('mod_kilman/bodypdf', $data);
+
+
+//echo $htmlbody;
+
 $pdf = new AnswerPdf("nombre del quiz", "titulo 2", "tema");
 
 // set document information
@@ -124,7 +128,13 @@ $pdf->SetCreator(PDF_CREATOR);
 
 $tagvs = array(
     'div' => array(
-        0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)
+        0 => array('h' => 0, 'n' => 0), 
+        1 => array('h' => 0, 'n' => 0),
+        2 => array('h' => 0, 'n' => 0),
+        3 => array('h' => 0, 'n' => 0),
+        4 => array('h' => 0, 'n' => 0),
+        5 => array('h' => 0, 'n' => 0),
+        6 => array('h' => 0, 'r' => 0)
     ),
     'ul' => array(
         0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)

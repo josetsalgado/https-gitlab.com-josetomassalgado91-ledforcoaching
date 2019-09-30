@@ -803,9 +803,16 @@ abstract class base {
      */
     public function response_outputpdf($data, $qnum='') {
         $pagetags = $this->questionstart_survey_display($qnum, $data);
-        $pagetags->qformelement = $this->response_survey_display($data);
+        
+        
+//        $pagetags->qformelement = $this->response_survey_display($data);
+        $pagetags->qformelement = $this->response_surveypdf_display($data);
+        
+        
         return $pagetags;
     }
+    
+    
     
     /**
      * Get the output for the start of the questions in a survey.
