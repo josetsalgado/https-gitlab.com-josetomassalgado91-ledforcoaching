@@ -281,7 +281,7 @@ your kilman or in the text of relevant questions.';
 $string['misconfigured'] = 'Course is misconfigured';
 $string['missingquestion'] = 'Please answer Required question ';
 $string['missingquestions'] = 'Please answer Required questions: ';
-$string['modulename'] = 'question';
+$string['modulename'] = 'Kilman';
 $string['modulename_help'] = 'The question module allows you to construct surveys using a variety of question types, for the purpose of gathering data from users.';
 $string['modulenameplural'] = 'questions';
 $string['movedisabled'] = 'This item cannot be moved';
