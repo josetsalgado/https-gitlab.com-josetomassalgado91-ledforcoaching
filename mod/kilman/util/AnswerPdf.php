@@ -14,7 +14,7 @@ class AnswerPdf extends TCPDF {
 
     public function Header() {
         global $OUTPUT;
-        $image_file = '../pix/2019-09-13.png';
+        $image_file = '../pix/logo.jpg';
         $this->Image($image_file,  15, 5, 28, '', 'PNG', true, 'C', true, 300, '',false,false);
 
         // Set font
